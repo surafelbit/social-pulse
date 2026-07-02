@@ -2,6 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
+Route::middleware('auth')->group(function () {
+    Route::post('/likes', [LikeController::class, 'store'])->name('likes.store');
+    Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
+});
 
 // 1. Dashboard route (protected by 'auth' and 'verified' middleware)
 Route::get('/dashboard', [PostController::class, 'index'])
