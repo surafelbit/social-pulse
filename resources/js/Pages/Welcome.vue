@@ -1,10 +1,14 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 
 defineProps({
     canLogin: { type: Boolean },
     canRegister: { type: Boolean },
 });
+
+const logout = () => {
+    router.post('/logout');
+};
 </script>
 
 <template>
@@ -27,6 +31,12 @@ defineProps({
                 >
                     Dashboard
                 </Link>
+                <button
+                    @click="logout"
+                    class="px-6 py-3 text-center bg-black text-white dark:bg-white dark:text-black hover:opacity-80 transition-all cursor-pointer"
+                >
+                    Log out
+                </button>
             </template>
 
             <template v-else>
