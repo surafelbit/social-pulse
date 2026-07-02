@@ -9,12 +9,14 @@ use Inertia\Inertia;
 class PostController extends Controller
 {
     public function index()
-    {
-        // This renders the dashboard and sends all posts to your Vue component
-        return Inertia::render('Dashboard', [
-            'posts' => Post::with('user')->latest()->get(),
-        ]);
-    }
+{
+    return Inertia::render('Dashboard', [
+        'posts' => Post::with(['user'])
+            ->withCount('likes') // This adds the 'likes_count' to each post
+            ->latest()
+            ->get(),
+    ]);
+}
 
     public function store(Request $request)
     {

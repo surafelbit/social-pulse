@@ -2,6 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\LikeController;
+use App\Http\Controllers\CommentController;
+use Inertia\Inertia;
+use Illuminate\Foundation\Application;
+
+
 Route::middleware('auth')->group(function () {
     Route::post('/likes', [LikeController::class, 'store'])->name('likes.store');
     Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
@@ -18,10 +24,16 @@ Route::post('/posts', [PostController::class, 'store'])
     ->name('posts.store');
 
 // 3. Welcome page
+
 Route::get('/', function () {
-    return view('welcome');
+    return Inertia::render('Welcome', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+        'laravelVersion' => Application::VERSION,
+        'phpVersion' => PHP_VERSION,
+    ]);
 });
 
-// 4. THIS IS WHAT YOU ARE MISSING: 
+
 // This line imports all the login/register/logout routes from Breeze
 require __DIR__.'/auth.php';
