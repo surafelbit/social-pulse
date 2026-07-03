@@ -6,6 +6,7 @@ import InputError from '@/Components/InputError.vue';
 const form = useForm({
     name: '',
     email: '',
+    username: '',
     password: '',
     password_confirmation: '',
     terms: false, // Added for the terms checkbox
@@ -117,6 +118,26 @@ const submit = () => {
                             </div>
                             <InputError class="mt-2" :message="form.errors.email" />
                         </div>
+                        <!-- Username Field -->
+<div class="space-y-2">
+    <label class="font-label-sm text-label-sm text-on-surface-variant block uppercase tracking-wider" for="username">Username</label>
+    <div class="relative group">
+        <input
+            id="username"
+            type="text"
+            v-model="form.username"
+            required
+            autocomplete="username"
+            class="w-full bg-white border border-outline-variant rounded-lg px-4 py-3 font-body-md focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary hover:border-[#32cd32]/50 transition-all"
+            placeholder="alexj"
+        />
+        <!-- At Symbol SVG -->
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-outline-variant group-focus-within:text-[#32cd32] transition-colors pointer-events-none">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Zm0 0c0 1.657 1.007 3 2.25 3S21 13.657 21 12a9 9 0 1 0-2.636 6.364M16.5 12V8.25" />
+        </svg>
+    </div>
+    <InputError class="mt-2" :message="form.errors.username" />
+</div>
 
                         <!-- Password Grid -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

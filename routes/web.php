@@ -8,9 +8,9 @@ use Inertia\Inertia;
 use Illuminate\Foundation\Application;
 
 
-Route::middleware('auth')->group(function () {
-    Route::post('/likes', [LikeController::class, 'store'])->name('likes.store');
-    Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', [PostController::class, 'index'])->name('dashboard');
+    Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
 });
 
 // 1. Dashboard route (protected by 'auth' and 'verified' middleware)
