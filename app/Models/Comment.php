@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Comment extends Model
 {
     // The fields we are allowed to save to the database
-    protected $fillable = ['user_id', 'post_id', 'body'];
+    protected $fillable = ['user_id', 'post_id', 'content'];
 
     // A comment belongs to a post
     public function post() { return $this->belongsTo(Post::class); }
