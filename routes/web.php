@@ -8,7 +8,7 @@ use App\Http\Controllers\ProfileController;
 use Inertia\Inertia;
 use Illuminate\Foundation\Application;
 use App\Http\Controllers\FollowController;
-
+use App\Http\Controllers\PublicProfileController;
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [PostController::class, 'index'])->name('dashboard');
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
@@ -22,10 +22,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/users/{user}/unfollow', [FollowController::class, 'destroy'])->name('users.unfollow');
 
     // Profile routes
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::post('/posts/{post}/comments', [App\Http\Controllers\CommentController::class, 'store'])->name('posts.comments.store');
+Route::get('/profile/{username}', [PublicProfileController::class, 'show'])->name('profile.show');
 });
 
 Route::get('/', function () {

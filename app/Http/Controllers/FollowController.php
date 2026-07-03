@@ -7,17 +7,11 @@ use Illuminate\Http\Request;
 
 class FollowController extends Controller
 {
-    public function store(User $user)
+   public function toggle(User $user)
     {
-        // 'attach' adds a row to the followers table
-        auth()->user()->following()->attach($user->id);
-        return back();
-    }
+        // Toggle the relationship: if it exists, remove it; if not, add it.
+        auth()->user()->following()->toggle($user->id);
 
-    public function destroy(User $user)
-    {
-        // 'detach' removes the row from the followers table
-        auth()->user()->following()->detach($user->id);
         return back();
     }
 }

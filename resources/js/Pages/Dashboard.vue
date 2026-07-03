@@ -1,7 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import { useForm, router } from '@inertiajs/vue3';
-
+import { Link, router, useForm } from '@inertiajs/vue3';
 const props = defineProps({
     posts: Array,
     suggestedUsers: Array,
@@ -65,28 +64,27 @@ const submitComment = (post) => {
     <div class="min-h-screen bg-[#0d0d0d] text-white font-body">
 
         <!-- ── Header ── -->
-        <header class="sticky top-0 z-50 bg-[#0d0d0d]/80 backdrop-blur-xl border-b border-white/5">
-            <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-                <!-- Logo -->
-                <div class="flex items-center gap-2.5">
-                    <span class="w-2.5 h-2.5 rounded-full bg-[#32cd32] shadow-[0_0_12px_rgba(50,205,50,0.7)]"></span>
-                    <span class="font-headline text-headline-md font-bold text-white tracking-tight">Social Pulse</span>
-                </div>
-
-                <!-- Nav actions -->
-                <div class="flex items-center gap-5">
-                    <a href="#" class="text-sm text-white/50 hover:text-white transition-colors hidden md:block">Home</a>
-                    <a href="#" class="text-sm text-white/50 hover:text-white transition-colors hidden md:block">Explore</a>
-                    <button
-                        @click="logout"
-                        id="logout-btn"
-                        class="text-xs font-semibold uppercase tracking-wider text-white/50 hover:text-red-400 transition-colors"
-                    >
-                        Logout
-                    </button>
-                </div>
-            </div>
-        </header>
+        <!-- Inside your <header> in Dashboard.vue -->
+<header class="sticky top-0 bg-white/80 backdrop-blur-md border-b border-gray-100 py-4 px-6 flex justify-between items-center z-10">
+    <h1 class="font-bold text-xl tracking-tighter uppercase italic">Social Pulse</h1>
+    
+    <div class="flex items-center gap-6">
+        <!-- New Profile Link -->
+        <Link 
+            :href="route('profile.show', $page.props.auth.user.username)" 
+            class="text-xs font-semibold uppercase hover:text-gray-500 transition-colors"
+        >
+            My Profile
+        </Link>
+        
+        <button 
+            @click="logout" 
+            class="text-xs font-semibold uppercase hover:text-red-500 transition-colors"
+        >
+            Logout
+        </button>
+    </div>
+</header>
 
         <!-- ── Main 2-column layout ── -->
         <main class="max-w-6xl mx-auto px-4 md:px-6 py-8 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 items-start">
@@ -135,7 +133,7 @@ const submitComment = (post) => {
                         class="group bg-white/5 border border-white/10 rounded-2xl p-5 transition-all hover:border-white/20 hover:bg-white/[0.07]"
                     >
                         <!-- User info row -->
-                        <div class="flex items-center gap-3 mb-3">
+                        <!-- <div class="flex items-center gap-3 mb-3">
                             <div class="w-9 h-9 rounded-full bg-gradient-to-br from-[#32cd32]/40 to-[#006e0a]/60 flex items-center justify-center flex-shrink-0 text-xs font-bold text-white uppercase">
                                 {{ post.user?.name?.charAt(0) ?? '?' }}
                             </div>
@@ -143,7 +141,19 @@ const submitComment = (post) => {
                                 <p class="text-sm font-semibold text-white leading-tight">{{ post.user?.name }}</p>
                                 <p class="text-xs text-white/40">@{{ post.user?.username }}</p>
                             </div>
-                        </div>
+                        </div> -->
+                        <Link 
+        :href="route('profile.show', post.user.username)" 
+        class="flex items-center gap-3 mb-3 hover:opacity-80 transition-opacity"
+    >
+        <div class="w-9 h-9 rounded-full bg-gradient-to-br from-[#32cd32]/40 to-[#006e0a]/60 flex items-center justify-center flex-shrink-0 text-xs font-bold text-white uppercase">
+            {{ post.user?.name?.charAt(0) ?? '?' }}
+        </div>
+        <div>
+            <p class="text-sm font-semibold text-white leading-tight">{{ post.user?.name }}</p>
+            <p class="text-xs text-white/40">@{{ post.user?.username }}</p>
+        </div>
+    </Link>
 
                         <!-- Content -->
                         <p class="text-base text-white/90 leading-relaxed mb-4">{{ post.content }}</p>
