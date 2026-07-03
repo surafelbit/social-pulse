@@ -11,20 +11,24 @@ class PostController extends Controller
    public function index()
 {
     $user = auth()->user();
-
-    // Get IDs of people the user follows
     $followingIds = $user->following()->pluck('following_id');
-    
-    // Add the current user's own ID so they see their own posts
     $followingIds->push($user->id);
 
+    // 1. Get the feed posts (like we planned)
     $posts = Post::with('user:id,name,username')
         ->whereIn('user_id', $followingIds)
         ->latest()
         ->get();
 
+    // 2. Get suggested users (not the current user, and not already followed)
+    $suggestedUsers = \App\Models\User::where('id', '!=', $user->id)
+        ->whereNotIn('id', $followingIds)
+        ->limit(5)
+        ->get();
+
     return Inertia::render('Dashboard', [
         'posts' => $posts,
+        'suggestedUsers' => $suggestedUsers, // Send this to Vue
     ]);
 }
 

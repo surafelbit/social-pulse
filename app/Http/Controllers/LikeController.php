@@ -18,4 +18,9 @@ class LikeController extends Controller
 
         return back();
     }
+    public function destroy(\App\Models\Post $post)
+{
+    $post->likes()->where('user_id', auth()->id())->delete();
+    return back();
+}
 }

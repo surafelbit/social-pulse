@@ -6,6 +6,10 @@ use App\Http\Controllers\LikeController;
 use App\Http\Controllers\CommentController;
 use Inertia\Inertia;
 use Illuminate\Foundation\Application;
+use App\Http\Controllers\FollowController;
+
+Route::post('/users/{user}/follow', [FollowController::class, 'store'])->name('users.follow');
+Route::delete('/users/{user}/unfollow', [FollowController::class, 'destroy'])->name('users.unfollow');
 
 
 Route::middleware(['auth', 'verified'])->group(function () {
