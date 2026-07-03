@@ -51,6 +51,14 @@ const followUser = (user) => {
         onFinish: () => { followingUserId.value = null; },
     });
 };
+const submitComment = (post) => {
+    router.post(route('posts.comments.store', post.id), { 
+        content: post.newComment 
+    }, { 
+        preserveScroll: true,
+        onSuccess: () => post.newComment = '' 
+    });
+};
 </script>
 
 <template>
@@ -168,6 +176,28 @@ const followUser = (user) => {
                             <!-- Timestamp placeholder -->
                             <span class="text-xs text-white/20 ml-auto">Just now</span>
                         </div>
+                        <!-- Inside your post loop, after the Like button -->
+<div class="mt-4 border-t border-gray-100 pt-4">
+        <!-- List Comments -->
+    <div v-for="comment in post.comments" :key="comment.id" class="text-sm mb-2">
+<span class="font-bold text-black">@{{ comment.user.username }}:</span> 
+        <span class="text-gray-700">{{ comment.content }}</span>    </div>
+
+    <!-- Comment Input -->
+    <form @submit.prevent="submitComment(post)" class="mt-3 flex gap-2">
+        <input 
+            v-model="post.newComment" 
+            placeholder="Write a comment..." 
+            class="flex-1 text-sm bg-white border border-gray-200 rounded-full px-4 py-2 text-black placeholder-gray-400 focus:border-black focus:ring-0 transition-all"
+        >
+        <button 
+            type="submit" 
+            class="text-xs font-bold uppercase text-black hover:text-gray-500 transition-colors"
+        >
+            Post
+        </button>
+    </form>
+</div>
                     </article>
                 </div>
 

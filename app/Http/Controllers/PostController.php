@@ -13,7 +13,7 @@ class PostController extends Controller
     $user = auth()->user();
     $followingIds = $user->following()->pluck('following_id')->push($user->id);
 
-    $posts = \App\Models\Post::with('user:id,name,username')
+    $posts = \App\Models\Post::with(['user:id,name,username', 'comments.user:id,username'])
         ->whereIn('user_id', $followingIds)
         ->latest()
         ->get()
