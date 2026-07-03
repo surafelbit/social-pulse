@@ -11,24 +11,22 @@ class PostController extends Controller
    public function index()
 {
     $user = auth()->user();
-    $followingIds = $user->following()->pluck('following_id');
-    $followingIds->push($user->id);
+    $followingIds = $user->following()->pluck('following_id')->push($user->id);
 
-    // 1. Get the feed posts (like we planned)
-    $posts = Post::with('user:id,name,username')
+    $posts = \App\Models\Post::with('user:id,name,username')
         ->whereIn('user_id', $followingIds)
         ->latest()
-        ->get();
-
-    // 2. Get suggested users (not the current user, and not already followed)
-    $suggestedUsers = \App\Models\User::where('id', '!=', $user->id)
-        ->whereNotIn('id', $followingIds)
-        ->limit(5)
-        ->get();
+        ->get()
+        ->map(function ($post) use ($user) {
+            // Add a temporary 'isLiked' boolean to every post object
+            $post->isLiked = $post->likes()->where('user_id', $user->id)->exists();
+            $post->likes_count = $post->likes()->count();
+            return $post;
+        });
 
     return Inertia::render('Dashboard', [
         'posts' => $posts,
-        'suggestedUsers' => $suggestedUsers, // Send this to Vue
+        'suggestedUsers' => \App\Models\User::whereNotIn('id', $followingIds)->limit(5)->get(),
     ]);
 }
 
