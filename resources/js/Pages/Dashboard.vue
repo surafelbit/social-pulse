@@ -9,7 +9,6 @@ const props = defineProps({
     suggestedUsers: Array,
 });
 
-// Dark / Light mode toggle
 const isDark = ref(
     typeof window !== "undefined"
         ? document.documentElement.classList.contains("dark")
@@ -27,7 +26,6 @@ const toggleTheme = () => {
     }
 };
 
-// Restore theme on mount
 if (typeof window !== "undefined") {
     const saved = localStorage.getItem("sp-theme");
     if (saved === "dark") {
@@ -42,7 +40,6 @@ if (typeof window !== "undefined") {
     }
 }
 
-// Post composer
 const form = useForm({ content: "", image: null });
 const submit = () => {
     form.post(route("posts.store"), {
