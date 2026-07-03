@@ -18,9 +18,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/likes/{post}', [LikeController::class, 'destroy'])->name('likes.destroy');
 
     // Follow routes
-    Route::post('/users/{user}/follow', [FollowController::class, 'store'])->name('users.follow');
-    Route::delete('/users/{user}/unfollow', [FollowController::class, 'destroy'])->name('users.unfollow');
-
+    Route::post('/users/{user}/follow', [FollowController::class, 'toggle'])->name('users.follow');
     // Profile routes
 Route::get('/profile/{username}', [PublicProfileController::class, 'show'])->name('profile.show');
 });

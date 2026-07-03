@@ -1,17 +1,10 @@
 <script setup>
 import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
 import { Link, useForm, usePage } from '@inertiajs/vue3';
 
 defineProps({
-    mustVerifyEmail: {
-        type: Boolean,
-    },
-    status: {
-        type: String,
-    },
+    mustVerifyEmail: { type: Boolean },
+    status: { type: String },
 });
 
 const user = usePage().props.auth.user;
@@ -24,86 +17,79 @@ const form = useForm({
 
 <template>
     <section>
-        <header>
-            <h2 class="text-lg font-medium text-gray-900">
-                Profile Information
-            </h2>
-
-            <p class="mt-1 text-sm text-gray-600">
+        <header class="mb-6">
+            <h2 class="text-base font-bold" style="color: var(--sp-text);">Profile Information</h2>
+            <p class="mt-1 text-sm" style="color: var(--sp-text-2);">
                 Update your account's profile information and email address.
             </p>
         </header>
 
-        <form
-            @submit.prevent="form.patch(route('profile.update'))"
-            class="mt-6 space-y-6"
-        >
-            <div>
-                <InputLabel for="name" value="Name" />
-
-                <TextInput
+        <form @submit.prevent="form.patch(route('profile.update'))" class="space-y-5">
+            <!-- Name -->
+            <div class="space-y-1.5">
+                <label for="name" class="text-xs font-bold uppercase tracking-widest" style="color: var(--sp-text-2);">Full Name</label>
+                <input
                     id="name"
                     type="text"
-                    class="mt-1 block w-full"
                     v-model="form.name"
                     required
                     autofocus
                     autocomplete="name"
+                    class="sp-input"
+                    placeholder="Your name"
                 />
-
-                <InputError class="mt-2" :message="form.errors.name" />
+                <InputError class="mt-1" :message="form.errors.name" />
             </div>
 
-            <div>
-                <InputLabel for="email" value="Email" />
-
-                <TextInput
+            <!-- Email -->
+            <div class="space-y-1.5">
+                <label for="email" class="text-xs font-bold uppercase tracking-widest" style="color: var(--sp-text-2);">Email Address</label>
+                <input
                     id="email"
                     type="email"
-                    class="mt-1 block w-full"
                     v-model="form.email"
                     required
                     autocomplete="username"
+                    class="sp-input"
+                    placeholder="your@email.com"
                 />
-
-                <InputError class="mt-2" :message="form.errors.email" />
+                <InputError class="mt-1" :message="form.errors.email" />
             </div>
 
-            <div v-if="mustVerifyEmail && user.email_verified_at === null">
-                <p class="mt-2 text-sm text-gray-800">
+            <!-- Email verification notice -->
+            <div v-if="mustVerifyEmail && user.email_verified_at === null" class="rounded-lg p-3 text-sm" style="background-color: rgba(50,205,50,0.08); border: 1px solid rgba(50,205,50,0.2);">
+                <p style="color: var(--sp-text);">
                     Your email address is unverified.
                     <Link
                         :href="route('verification.send')"
                         method="post"
                         as="button"
-                        class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        class="text-[#32cd32] font-bold underline hover:no-underline ml-1"
                     >
-                        Click here to re-send the verification email.
+                        Re-send verification email
                     </Link>
                 </p>
-
-                <div
-                    v-show="status === 'verification-link-sent'"
-                    class="mt-2 text-sm font-medium text-green-600"
-                >
-                    A new verification link has been sent to your email address.
-                </div>
+                <p v-show="status === 'verification-link-sent'" class="mt-1 font-medium text-[#32cd32]">
+                    A new verification link has been sent.
+                </p>
             </div>
 
-            <div class="flex items-center gap-4">
-                <PrimaryButton :disabled="form.processing">Save</PrimaryButton>
-
-                <Transition
-                    enter-active-class="transition ease-in-out"
-                    enter-from-class="opacity-0"
-                    leave-active-class="transition ease-in-out"
-                    leave-to-class="opacity-0"
+            <!-- Actions -->
+            <div class="flex items-center gap-4 pt-1">
+                <button
+                    type="submit"
+                    :disabled="form.processing"
+                    class="sp-btn-primary text-sm px-6 py-2"
                 >
-                    <p
-                        v-if="form.recentlySuccessful"
-                        class="text-sm text-gray-600"
-                    >
-                        Saved.
+                    {{ form.processing ? 'Saving…' : 'Save Changes' }}
+                </button>
+
+                <Transition enter-active-class="transition duration-200" enter-from-class="opacity-0 translate-y-1" leave-active-class="transition duration-200" leave-to-class="opacity-0">
+                    <p v-if="form.recentlySuccessful" class="text-sm font-medium text-[#32cd32] flex items-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+                        </svg>
+                        Saved
                     </p>
                 </Transition>
             </div>

@@ -36,7 +36,7 @@ const submit = () => {
     <Head title="Login | Social Pulse" />
 
     <!-- Full Page Wrapper -->
-    <div class="font-body-md text-on-background min-h-screen flex flex-col bg-[#f9f9f9]">
+    <div class="font-body-md text-on-background min-h-screen flex flex-col" style="background-color: var(--sp-bg); color: var(--sp-text);">
 
         <!-- TopNavBar -->
         <nav class="bg-surface/80 backdrop-blur-md w-full top-0 sticky border-b border-outline-variant z-50">

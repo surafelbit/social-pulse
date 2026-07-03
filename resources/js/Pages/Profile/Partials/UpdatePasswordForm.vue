@@ -1,8 +1,5 @@
 <script setup>
 import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
 import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
@@ -35,85 +32,80 @@ const updatePassword = () => {
 
 <template>
     <section>
-        <header>
-            <h2 class="text-lg font-medium text-gray-900">
-                Update Password
-            </h2>
-
-            <p class="mt-1 text-sm text-gray-600">
-                Ensure your account is using a long, random password to stay
-                secure.
+        <header class="mb-6">
+            <h2 class="text-base font-bold" style="color: var(--sp-text);">Update Password</h2>
+            <p class="mt-1 text-sm" style="color: var(--sp-text-2);">
+                Ensure your account is using a strong, unique password.
             </p>
         </header>
 
-        <form @submit.prevent="updatePassword" class="mt-6 space-y-6">
-            <div>
-                <InputLabel for="current_password" value="Current Password" />
-
-                <TextInput
+        <form @submit.prevent="updatePassword" class="space-y-5">
+            <!-- Current Password -->
+            <div class="space-y-1.5">
+                <label for="current_password" class="text-xs font-bold uppercase tracking-widest" style="color: var(--sp-text-2);">Current Password</label>
+                <input
                     id="current_password"
                     ref="currentPasswordInput"
                     v-model="form.current_password"
                     type="password"
-                    class="mt-1 block w-full"
+                    class="sp-input"
                     autocomplete="current-password"
+                    placeholder="••••••••"
                 />
-
-                <InputError
-                    :message="form.errors.current_password"
-                    class="mt-2"
-                />
+                <InputError :message="form.errors.current_password" class="mt-1" />
             </div>
 
-            <div>
-                <InputLabel for="password" value="New Password" />
-
-                <TextInput
+            <!-- New Password -->
+            <div class="space-y-1.5">
+                <label for="password" class="text-xs font-bold uppercase tracking-widest" style="color: var(--sp-text-2);">New Password</label>
+                <input
                     id="password"
                     ref="passwordInput"
                     v-model="form.password"
                     type="password"
-                    class="mt-1 block w-full"
+                    class="sp-input"
                     autocomplete="new-password"
+                    placeholder="••••••••"
                 />
-
-                <InputError :message="form.errors.password" class="mt-2" />
+                <!-- Strength bar -->
+                <div class="flex gap-1" v-if="form.password">
+                    <span v-for="i in 4" :key="i" class="h-1 flex-1 rounded-full transition-colors duration-300"
+                        :style="{ backgroundColor: form.password.length >= i * 3 ? '#32cd32' : 'var(--sp-border)' }">
+                    </span>
+                </div>
+                <InputError :message="form.errors.password" class="mt-1" />
             </div>
 
-            <div>
-                <InputLabel
-                    for="password_confirmation"
-                    value="Confirm Password"
-                />
-
-                <TextInput
+            <!-- Confirm Password -->
+            <div class="space-y-1.5">
+                <label for="password_confirmation" class="text-xs font-bold uppercase tracking-widest" style="color: var(--sp-text-2);">Confirm Password</label>
+                <input
                     id="password_confirmation"
                     v-model="form.password_confirmation"
                     type="password"
-                    class="mt-1 block w-full"
+                    class="sp-input"
                     autocomplete="new-password"
+                    placeholder="••••••••"
                 />
-
-                <InputError
-                    :message="form.errors.password_confirmation"
-                    class="mt-2"
-                />
+                <InputError :message="form.errors.password_confirmation" class="mt-1" />
             </div>
 
-            <div class="flex items-center gap-4">
-                <PrimaryButton :disabled="form.processing">Save</PrimaryButton>
-
-                <Transition
-                    enter-active-class="transition ease-in-out"
-                    enter-from-class="opacity-0"
-                    leave-active-class="transition ease-in-out"
-                    leave-to-class="opacity-0"
+            <!-- Actions -->
+            <div class="flex items-center gap-4 pt-1">
+                <button
+                    type="submit"
+                    :disabled="form.processing"
+                    class="sp-btn-primary text-sm px-6 py-2"
                 >
-                    <p
-                        v-if="form.recentlySuccessful"
-                        class="text-sm text-gray-600"
-                    >
-                        Saved.
+                    {{ form.processing ? 'Updating…' : 'Update Password' }}
+                </button>
+
+                <Transition enter-active-class="transition duration-200" enter-from-class="opacity-0" leave-active-class="transition duration-200" leave-to-class="opacity-0">
+                    <p v-if="form.recentlySuccessful" class="text-sm font-medium text-[#32cd32] flex items-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+                        </svg>
+                        Updated
                     </p>
                 </Transition>
             </div>

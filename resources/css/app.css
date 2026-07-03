@@ -1,3 +1,219 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ─── Google Fonts ─────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
+
+/* ─── CSS Custom Properties ────────────────────────────────── */
+:root {
+  /* Light Mode */
+  --sp-bg:           #ffffff;
+  --sp-bg-2:         #f5f5f5;
+  --sp-bg-3:         #ebebeb;
+  --sp-surface:      #ffffff;
+  --sp-card:         #f9f9f9;
+  --sp-border:       #e8e8e8;
+  --sp-border-2:     #d4d4d4;
+  --sp-text:         #0d0d0d;
+  --sp-text-2:       #4a4a4a;
+  --sp-text-3:       #9ca3af;
+  --sp-primary:      #32cd32;
+  --sp-primary-dark: #006e0a;
+  --sp-primary-glow: rgba(50, 205, 50, 0.25);
+  --sp-primary-soft: rgba(50, 205, 50, 0.10);
+  --sp-on-primary:   #000000;
+
+  /* Transition */
+  --sp-transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.dark {
+  /* Dark Mode */
+  --sp-bg:           #0d0d0d;
+  --sp-bg-2:         #161616;
+  --sp-bg-3:         #1f1f1f;
+  --sp-surface:      #141414;
+  --sp-card:         #1a1a1a;
+  --sp-border:       #2a2a2a;
+  --sp-border-2:     #3a3a3a;
+  --sp-text:         #f0f0f0;
+  --sp-text-2:       #a0a0a0;
+  --sp-text-3:       #555555;
+  --sp-primary:      #32cd32;
+  --sp-primary-dark: #4ce346;
+  --sp-primary-glow: rgba(50, 205, 50, 0.20);
+  --sp-primary-soft: rgba(50, 205, 50, 0.08);
+  --sp-on-primary:   #000000;
+}
+
+/* ─── Base Resets ──────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--sp-bg);
+  color: var(--sp-text);
+  transition: var(--sp-transition);
+}
+
+/* ─── Theme-aware utility classes ──────────────────────────── */
+@layer components {
+  .sp-bg        { background-color: var(--sp-bg); }
+  .sp-bg-2      { background-color: var(--sp-bg-2); }
+  .sp-card      { background-color: var(--sp-card); }
+  .sp-border    { border-color: var(--sp-border); }
+  .sp-text      { color: var(--sp-text); }
+  .sp-text-2    { color: var(--sp-text-2); }
+  .sp-text-3    { color: var(--sp-text-3); }
+
+  /* Lime-accented card */
+  .sp-glass-card {
+    background-color: var(--sp-card);
+    border: 1px solid var(--sp-border);
+    border-radius: 1rem;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  }
+  .sp-glass-card:hover {
+    border-color: rgba(50, 205, 50, 0.35);
+    box-shadow: 0 8px 32px var(--sp-primary-glow);
+  }
+
+  /* Primary button */
+  .sp-btn-primary {
+    background: linear-gradient(135deg, #32cd32 0%, #28a828 100%);
+    color: #000;
+    font-weight: 700;
+    border-radius: 9999px;
+    padding: 0.5rem 1.5rem;
+    transition: box-shadow 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+  }
+  .sp-btn-primary:hover {
+    box-shadow: 0 0 20px rgba(50, 205, 50, 0.45);
+    transform: translateY(-1px);
+  }
+  .sp-btn-primary:active { transform: scale(0.96); }
+  .sp-btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* Outline button */
+  .sp-btn-outline {
+    border: 1.5px solid rgba(50, 205, 50, 0.55);
+    color: #32cd32;
+    font-weight: 700;
+    border-radius: 9999px;
+    padding: 0.375rem 0.875rem;
+    transition: all 0.2s ease;
+    background: transparent;
+    font-size: 0.75rem;
+  }
+  .sp-btn-outline:hover {
+    background: #32cd32;
+    color: #000;
+    border-color: #32cd32;
+  }
+  .sp-btn-outline:active { transform: scale(0.95); }
+
+  /* Theme input */
+  .sp-input {
+    background-color: var(--sp-bg);
+    border: 1px solid var(--sp-border);
+    color: var(--sp-text);
+    border-radius: 0.5rem;
+    padding: 0.625rem 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    outline: none;
+    width: 100%;
+  }
+  .sp-input::placeholder { color: var(--sp-text-3); }
+  .sp-input:focus {
+    border-color: #32cd32;
+    box-shadow: 0 0 0 3px rgba(50, 205, 50, 0.15);
+  }
+
+  /* Nav header */
+  .sp-header {
+    background-color: var(--sp-bg);
+    border-bottom: 1px solid var(--sp-border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    transition: var(--sp-transition);
+  }
+
+  /* Gradient text */
+  .sp-gradient-text {
+    background: linear-gradient(135deg, #28a828 0%, #32cd32 50%, #4ce346 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Lime accent bar (top of cards) */
+  .sp-accent-bar {
+    height: 3px;
+    background: linear-gradient(90deg, #32cd32, #4ce346, #32cd32);
+    background-size: 200% 100%;
+    animation: shimmer 3s linear infinite;
+    border-radius: 9999px;
+  }
+
+  /* Avatar circle */
+  .sp-avatar {
+    border-radius: 9999px;
+    background: linear-gradient(135deg, rgba(50,205,50,0.35) 0%, rgba(0,110,10,0.55) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar        { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track  { background: transparent; }
+  ::-webkit-scrollbar-thumb  { background: var(--sp-border-2); border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background: #32cd32; }
+}
+
+/* ─── Animations ────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  50%       { transform: translateY(-20px) translateX(10px); }
+}
+
+@keyframes float-slower {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  50%       { transform: translateY(18px) translateX(-14px); }
+}
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-ring {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.05); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

@@ -6,7 +6,16 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'Social Pulse';
+
+// ─── Apply saved theme before first paint ─────────────────────
+const savedTheme = localStorage.getItem('sp-theme');
+if (savedTheme === 'dark') {
+    document.documentElement.classList.add('dark');
+} else if (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.documentElement.classList.add('dark');
+    localStorage.setItem('sp-theme', 'dark');
+}
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -22,6 +31,6 @@ createInertiaApp({
             .mount(el);
     },
     progress: {
-        color: '#4B5563',
+        color: '#32cd32',
     },
 });

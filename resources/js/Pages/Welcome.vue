@@ -1,26 +1,40 @@
 <template>
-  <div class="font-body-md text-body-md antialiased pulse-theme">
+  <div class="font-body-md text-body-md antialiased" style="background-color: var(--sp-bg); color: var(--sp-text); min-height: 100vh;">
     <!-- Header / TopNavBar -->
-    <header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-black/5 shadow-sm">
+    <header class="fixed top-0 w-full z-50 sp-header">
       <div class="flex justify-between items-center px-margin-desktop py-4 max-w-container-max mx-auto">
-        <div class="flex items-center gap-2">
-          <span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">leak_add</span>
-          <a class="font-headline-md text-headline-md font-bold text-on-surface tracking-tighter" href="#">Social Pulse</a>
+        <div class="flex items-center gap-2.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#32cd32] shadow-[0_0_12px_rgba(50,205,50,0.7)] pulse-glow"></span>
+          <a class="font-headline font-bold text-lg tracking-tight" href="#" style="color: var(--sp-text);">Social<span class="sp-gradient-text">Pulse</span></a>
         </div>
         <nav class="hidden md:flex items-center space-x-8">
-          <a class="text-primary font-bold border-b-2 border-primary pb-1 font-body-md text-body-md" href="#">Features</a>
-          <a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Community</a>
-          <a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md flex items-center gap-1" href="#">
-            <span class="w-2 h-2 rounded-full bg-primary pulse-glow"></span>
+          <a class="text-[#32cd32] font-bold border-b-2 border-[#32cd32] pb-1 text-sm" href="#">Features</a>
+          <a class="hover:text-[#32cd32] transition-colors text-sm" href="#" style="color: var(--sp-text-2);">Community</a>
+          <a class="hover:text-[#32cd32] transition-colors text-sm flex items-center gap-1.5" href="#" style="color: var(--sp-text-2);">
+            <span class="w-2 h-2 rounded-full bg-[#32cd32] pulse-glow"></span>
             Live
           </a>
-          <a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">About</a>
+          <a class="hover:text-[#32cd32] transition-colors text-sm" href="#" style="color: var(--sp-text-2);">About</a>
         </nav>
-        <div class="flex items-center gap-4">
-          <a class="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-4 py-2" href="login">Login</a>
-          <a href="/register" class="bg-primary text-on-primary px-6 py-2 rounded-full font-label-md text-label-md hover:scale-105 active:scale-95 transition-all duration-200 inline-block text-center">
-  Register
-</a>
+        <div class="flex items-center gap-3">
+          <!-- Dark mode toggle -->
+          <button
+            @click="toggleTheme"
+            id="welcome-theme-toggle"
+            class="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 hover:bg-[#32cd32]/10 hover:text-[#32cd32]"
+            style="color: var(--sp-text-2); border: 1px solid var(--sp-border);"
+          >
+            <svg v-if="isDark" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"/>
+            </svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"/>
+            </svg>
+          </button>
+          <a class="hover:text-[#32cd32] transition-colors text-sm font-semibold px-3 py-1.5" href="login" style="color: var(--sp-text-2);">Login</a>
+          <a href="/register" class="sp-btn-primary text-sm px-5 py-2">
+            Register
+          </a>
         </div>
       </div>
     </header>
@@ -185,11 +199,27 @@ import { onMounted, onUnmounted, ref } from 'vue';
 const mainContainer = ref(null);
 let observer = null;
 
+const isDark = ref(
+  typeof window !== 'undefined'
+    ? document.documentElement.classList.contains('dark')
+    : false
+);
+
+const toggleTheme = () => {
+  isDark.value = !isDark.value;
+  if (isDark.value) {
+    document.documentElement.classList.add('dark');
+    localStorage.setItem('sp-theme', 'dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+    localStorage.setItem('sp-theme', 'light');
+  }
+};
+
 const handleMouseMove = (e) => {
   const orbs = document.querySelectorAll('.orb-element');
   const x = (e.clientX / window.innerWidth) - 0.5;
   const y = (e.clientY / window.innerHeight) - 0.5;
-  
   orbs.forEach((orb, index) => {
     const speed = (index + 1) * 40;
     orb.style.transform = `translate(${x * speed}px, ${y * speed}px)`;
@@ -197,14 +227,8 @@ const handleMouseMove = (e) => {
 };
 
 onMounted(() => {
-  // Micro-interactions and effects
   window.addEventListener('mousemove', handleMouseMove);
-
-  // Simple smooth reveal for cards
-  const observerOptions = {
-    threshold: 0.1
-  };
-
+  const observerOptions = { threshold: 0.1 };
   observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -213,7 +237,6 @@ onMounted(() => {
       }
     });
   }, observerOptions);
-
   document.querySelectorAll('.animated-card').forEach(card => {
     card.classList.add('transition-all', 'duration-700', 'opacity-0', 'translate-y-10');
     observer.observe(card);
@@ -222,62 +245,51 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('mousemove', handleMouseMove);
-  if (observer) {
-    observer.disconnect();
-  }
+  if (observer) observer.disconnect();
 });
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700;800&family=Inter:wght@400;500;600&family=Geist:wght@600&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
-
-.pulse-theme {
-  background-color: #ffffff;
-  color: #1a1c1c;
-}
-
 .glass-card {
-  background: rgba(0, 0, 0, 0.03);
+  background-color: var(--sp-card);
+  border: 1px solid var(--sp-border);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(0, 0, 0, 0.08);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 .glass-card:hover {
-  border-color: rgba(0, 110, 10, 0.3);
+  border-color: rgba(50, 205, 50, 0.35);
   transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05), 0 0 20px rgba(0, 110, 10, 0.05);
+  box-shadow: 0 20px 40px var(--sp-primary-glow);
 }
-
 .gradient-text {
-  background: linear-gradient(135deg, #006e0a 0%, #32cd32 100%);
+  background: linear-gradient(135deg, #28a828 0%, #32cd32 50%, #4ce346 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-
 .btn-primary {
-  background: linear-gradient(135deg, #006e0a 0%, #32cd32 100%);
+  background: linear-gradient(135deg, #32cd32 0%, #28a828 100%);
+  color: #000;
   transition: all 0.2s ease;
 }
-
 .pulse-glow {
   animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
-
 @keyframes pulse-ring {
   0%, 100% { opacity: 0.5; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.05); }
+  50%       { opacity: 1;   transform: scale(1.05); }
 }
-
 .floating-orb {
   position: absolute;
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, rgba(0, 110, 10, 0.08) 0%, rgba(50, 205, 50, 0) 70%);
+  background: radial-gradient(circle, rgba(50, 205, 50, 0.08) 0%, transparent 70%);
   border-radius: 50%;
   filter: blur(60px);
   z-index: -1;
   pointer-events: none;
 }
+/* Override text colors to use CSS vars */
+.text-on-surface         { color: var(--sp-text); }
+.text-on-surface-variant { color: var(--sp-text-2); }
+.bg-surface-container-lowest { background-color: var(--sp-bg); }
 </style>
