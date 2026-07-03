@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Post extends Model
 {
     // This tells Laravel which fields can be filled by a user
-    protected $fillable = ['content'];
+    protected $fillable = ['content', 'image_path'];
 
     // Relationships: A post belongs to a user, and has many likes and comments
     public function user() 

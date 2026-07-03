@@ -1,6 +1,8 @@
 <script setup>
-import { ref } from 'vue';
-import { Link, router, useForm } from '@inertiajs/vue3';
+import { ref } from "vue";
+import { Link, router, useForm } from "@inertiajs/vue3";
+
+const selectedImagePreview = ref("");
 
 const props = defineProps({
     posts: Array,
@@ -9,47 +11,61 @@ const props = defineProps({
 
 // Dark / Light mode toggle
 const isDark = ref(
-    typeof window !== 'undefined'
-        ? document.documentElement.classList.contains('dark')
-        : false
+    typeof window !== "undefined"
+        ? document.documentElement.classList.contains("dark")
+        : false,
 );
 
 const toggleTheme = () => {
     isDark.value = !isDark.value;
     if (isDark.value) {
-        document.documentElement.classList.add('dark');
-        localStorage.setItem('sp-theme', 'dark');
+        document.documentElement.classList.add("dark");
+        localStorage.setItem("sp-theme", "dark");
     } else {
-        document.documentElement.classList.remove('dark');
-        localStorage.setItem('sp-theme', 'light');
+        document.documentElement.classList.remove("dark");
+        localStorage.setItem("sp-theme", "light");
     }
 };
 
 // Restore theme on mount
-if (typeof window !== 'undefined') {
-    const saved = localStorage.getItem('sp-theme');
-    if (saved === 'dark') {
-        document.documentElement.classList.add('dark');
+if (typeof window !== "undefined") {
+    const saved = localStorage.getItem("sp-theme");
+    if (saved === "dark") {
+        document.documentElement.classList.add("dark");
         isDark.value = true;
-    } else if (saved === 'light') {
-        document.documentElement.classList.remove('dark');
+    } else if (saved === "light") {
+        document.documentElement.classList.remove("dark");
         isDark.value = false;
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.documentElement.classList.add('dark');
+    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        document.documentElement.classList.add("dark");
         isDark.value = true;
     }
 }
 
 // Post composer
-const form = useForm({ content: '' });
+const form = useForm({ content: "", image: null });
 const submit = () => {
-    form.post(route('posts.store'), {
-        onSuccess: () => form.reset(),
+    form.post(route("posts.store"), {
+        onSuccess: () => {
+            form.reset();
+            selectedImagePreview.value = "";
+        },
     });
 };
 
+const handleImageSelection = (event) => {
+    const file = event.target.files?.[0] ?? null;
+    form.image = file;
+
+    if (selectedImagePreview.value) {
+        URL.revokeObjectURL(selectedImagePreview.value);
+    }
+
+    selectedImagePreview.value = file ? URL.createObjectURL(file) : "";
+};
+
 // Logout
-const logout = () => router.post(route('logout'));
+const logout = () => router.post(route("logout"));
 
 // Like logic
 const likingPostId = ref(null);
@@ -57,15 +73,23 @@ const toggleLike = (post) => {
     if (likingPostId.value === post.id) return;
     likingPostId.value = post.id;
     if (post.isLiked) {
-        router.delete(route('likes.destroy', post.id), {
+        router.delete(route("likes.destroy", post.id), {
             preserveScroll: true,
-            onFinish: () => { likingPostId.value = null; },
+            onFinish: () => {
+                likingPostId.value = null;
+            },
         });
     } else {
-        router.post(route('likes.store'), { post_id: post.id }, {
-            preserveScroll: true,
-            onFinish: () => { likingPostId.value = null; },
-        });
+        router.post(
+            route("likes.store"),
+            { post_id: post.id },
+            {
+                preserveScroll: true,
+                onFinish: () => {
+                    likingPostId.value = null;
+                },
+            },
+        );
     }
 };
 
@@ -74,34 +98,52 @@ const followingUserId = ref(null);
 const followUser = (user) => {
     if (followingUserId.value === user.id) return;
     followingUserId.value = user.id;
-    router.post(route('users.follow', user.id), {}, {
-        preserveScroll: true,
-        onFinish: () => { followingUserId.value = null; },
-    });
+    router.post(
+        route("users.follow", user.id),
+        {},
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                followingUserId.value = null;
+            },
+        },
+    );
 };
 
 // Comment logic
 const submitComment = (post) => {
-    router.post(route('posts.comments.store', post.id), {
-        content: post.newComment
-    }, {
-        preserveScroll: true,
-        onSuccess: () => post.newComment = ''
-    });
+    router.post(
+        route("posts.comments.store", post.id),
+        {
+            content: post.newComment,
+        },
+        {
+            preserveScroll: true,
+            onSuccess: () => (post.newComment = ""),
+        },
+    );
 };
 </script>
 
 <template>
-    <div class="min-h-screen transition-colors duration-300" style="background-color: var(--sp-bg); color: var(--sp-text);">
-
+    <div
+        class="min-h-screen transition-colors duration-300"
+        style="background-color: var(--sp-bg); color: var(--sp-text)"
+    >
         <!-- ── HEADER ─────────────────────────────────── -->
         <header class="sticky top-0 z-50 sp-header">
-            <div class="max-w-6xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between gap-4">
-
+            <div
+                class="max-w-6xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between gap-4"
+            >
                 <!-- Logo -->
                 <div class="flex items-center gap-2.5">
-                    <span class="w-2.5 h-2.5 rounded-full bg-[#32cd32] shadow-[0_0_12px_rgba(50,205,50,0.7)] animate-pulse-glow"></span>
-                    <span class="font-headline font-bold text-lg tracking-tight" style="color: var(--sp-text);">
+                    <span
+                        class="w-2.5 h-2.5 rounded-full bg-[#32cd32] shadow-[0_0_12px_rgba(50,205,50,0.7)] animate-pulse-glow"
+                    ></span>
+                    <span
+                        class="font-headline font-bold text-lg tracking-tight"
+                        style="color: var(--sp-text)"
+                    >
                         Social<span class="sp-gradient-text">Pulse</span>
                     </span>
                 </div>
@@ -110,14 +152,21 @@ const submitComment = (post) => {
                 <nav class="flex items-center gap-3 md:gap-5">
                     <!-- Profile link -->
                     <Link
-                        :href="route('profile.show', $page.props.auth.user.username)"
+                        :href="
+                            route(
+                                'profile.show',
+                                $page.props.auth.user.username,
+                            )
+                        "
                         class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide transition-colors duration-200 hover:text-[#32cd32]"
-                        style="color: var(--sp-text-2);"
+                        style="color: var(--sp-text-2)"
                     >
                         <div class="w-7 h-7 sp-avatar text-[10px]">
-                            {{ $page.props.auth.user.name?.charAt(0) ?? '?' }}
+                            {{ $page.props.auth.user.name?.charAt(0) ?? "?" }}
                         </div>
-                        <span class="hidden sm:inline">{{ $page.props.auth.user.name }}</span>
+                        <span class="hidden sm:inline">{{
+                            $page.props.auth.user.name
+                        }}</span>
                     </Link>
 
                     <!-- Theme toggle -->
@@ -125,16 +174,47 @@ const submitComment = (post) => {
                         @click="toggleTheme"
                         id="theme-toggle"
                         class="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 hover:bg-[#32cd32]/10 hover:text-[#32cd32] focus:outline-none"
-                        style="color: var(--sp-text-2); border: 1px solid var(--sp-border);"
-                        :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+                        style="
+                            color: var(--sp-text-2);
+                            border: 1px solid var(--sp-border);
+                        "
+                        :title="
+                            isDark
+                                ? 'Switch to light mode'
+                                : 'Switch to dark mode'
+                        "
                     >
                         <!-- Sun icon (light mode) -->
-                        <svg v-if="isDark" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"/>
+                        <svg
+                            v-if="isDark"
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
+                            />
                         </svg>
                         <!-- Moon icon (dark mode) -->
-                        <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"/>
+                        <svg
+                            v-else
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"
+                            />
                         </svg>
                     </button>
 
@@ -143,10 +223,21 @@ const submitComment = (post) => {
                         @click="logout"
                         id="logout-btn"
                         class="hidden sm:flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide transition-colors duration-200 hover:text-red-400"
-                        style="color: var(--sp-text-2);"
+                        style="color: var(--sp-text-2)"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-3.5 h-3.5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
+                            />
                         </svg>
                         Logout
                     </button>
@@ -155,11 +246,11 @@ const submitComment = (post) => {
         </header>
 
         <!-- ── MAIN 2-COLUMN LAYOUT ────────────────────── -->
-        <main class="max-w-6xl mx-auto px-4 md:px-6 py-8 grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 items-start">
-
+        <main
+            class="max-w-6xl mx-auto px-4 md:px-6 py-8 grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 items-start"
+        >
             <!-- ── LEFT: FEED ─────────────────────────── -->
             <div class="space-y-5">
-
                 <!-- Post Composer -->
                 <div class="sp-glass-card p-5 shadow-sm animate-rise-in">
                     <!-- Lime accent top bar -->
@@ -169,7 +260,9 @@ const submitComment = (post) => {
                         <div class="flex items-start gap-3">
                             <!-- Author avatar -->
                             <div class="w-9 h-9 sp-avatar flex-shrink-0">
-                                {{ $page.props.auth.user.name?.charAt(0) ?? '?' }}
+                                {{
+                                    $page.props.auth.user.name?.charAt(0) ?? "?"
+                                }}
                             </div>
 
                             <textarea
@@ -179,22 +272,78 @@ const submitComment = (post) => {
                                 maxlength="280"
                                 placeholder="What's on your mind?"
                                 class="flex-1 bg-transparent resize-none focus:outline-none leading-relaxed text-base placeholder-[var(--sp-text-3)] transition-colors"
-                                style="color: var(--sp-text);"
+                                style="color: var(--sp-text)"
                             ></textarea>
                         </div>
 
-                        <div class="flex items-center justify-between mt-4 pt-3" style="border-top: 1px solid var(--sp-border);">
+                        <div
+                            v-if="selectedImagePreview"
+                            class="mt-3 rounded-2xl overflow-hidden border"
+                            style="border-color: var(--sp-border)"
+                        >
+                            <img
+                                :src="selectedImagePreview"
+                                alt="Selected preview"
+                                class="w-full max-h-72 object-cover"
+                            />
+                        </div>
+
+                        <div
+                            class="flex items-center justify-between mt-4 pt-3"
+                            style="border-top: 1px solid var(--sp-border)"
+                        >
                             <div class="flex items-center gap-2">
-                                <span class="text-xs font-mono" style="color: var(--sp-text-3);">
-                                    {{ form.content.length }}<span style="color: var(--sp-border-2);">/280</span>
+                                <label
+                                    class="flex items-center gap-2 cursor-pointer text-sm"
+                                    style="color: var(--sp-text-3)"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        stroke-width="1.8"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M6.75 6.75A2.25 2.25 0 0 1 9 4.5h6a2.25 2.25 0 0 1 2.25 2.25v.75M6.75 6.75H4.5a2.25 2.25 0 0 0-2.25 2.25v8.25A2.25 2.25 0 0 0 4.5 19.5h15a2.25 2.25 0 0 0 2.25-2.25V9A2.25 2.25 0 0 0 19.5 6.75h-2.25"
+                                        />
+                                    </svg>
+                                    <span>Add photo</span>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        class="hidden"
+                                        @change="handleImageSelection"
+                                    />
+                                </label>
+                                <span
+                                    class="text-xs font-mono"
+                                    style="color: var(--sp-text-3)"
+                                >
+                                    {{ form.content.length
+                                    }}<span style="color: var(--sp-border-2)"
+                                        >/280</span
+                                    >
                                 </span>
                                 <!-- Character usage bar -->
-                                <div class="w-16 h-1 rounded-full overflow-hidden" style="background-color: var(--sp-border);">
+                                <div
+                                    class="w-16 h-1 rounded-full overflow-hidden"
+                                    style="background-color: var(--sp-border)"
+                                >
                                     <div
                                         class="h-full rounded-full transition-all duration-300"
                                         :style="{
-                                            width: (form.content.length / 280 * 100) + '%',
-                                            backgroundColor: form.content.length > 250 ? '#ef4444' : '#32cd32'
+                                            width:
+                                                (form.content.length / 280) *
+                                                    100 +
+                                                '%',
+                                            backgroundColor:
+                                                form.content.length > 250
+                                                    ? '#ef4444'
+                                                    : '#32cd32',
                                         }"
                                     ></div>
                                 </div>
@@ -203,24 +352,52 @@ const submitComment = (post) => {
                             <button
                                 type="submit"
                                 id="post-submit-btn"
-                                :disabled="form.processing || !form.content.trim()"
+                                :disabled="
+                                    form.processing ||
+                                    (!form.content.trim() && !form.image)
+                                "
                                 class="sp-btn-primary text-sm px-6 py-2"
                             >
-                                {{ form.processing ? 'Posting…' : 'Post' }}
+                                {{ form.processing ? "Posting…" : "Post" }}
                             </button>
                         </div>
                     </form>
                 </div>
 
                 <!-- Empty state -->
-                <div v-if="!posts || posts.length === 0" class="text-center py-20 animate-rise-in">
-                    <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style="background-color: var(--sp-card); border: 1px solid var(--sp-border);">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="color: var(--sp-text-3);">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/>
+                <div
+                    v-if="!posts || posts.length === 0"
+                    class="text-center py-20 animate-rise-in"
+                >
+                    <div
+                        class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
+                        style="
+                            background-color: var(--sp-card);
+                            border: 1px solid var(--sp-border);
+                        "
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-7 h-7"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                            style="color: var(--sp-text-3)"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"
+                            />
                         </svg>
                     </div>
-                    <p class="font-semibold mb-1" style="color: var(--sp-text);">Nothing here yet</p>
-                    <p class="text-sm" style="color: var(--sp-text-3);">Follow someone to see their posts in your feed.</p>
+                    <p class="font-semibold mb-1" style="color: var(--sp-text)">
+                        Nothing here yet
+                    </p>
+                    <p class="text-sm" style="color: var(--sp-text-3)">
+                        Follow someone to see their posts in your feed.
+                    </p>
                 </div>
 
                 <!-- Feed posts -->
@@ -236,19 +413,48 @@ const submitComment = (post) => {
                             class="flex items-center gap-3 mb-4 hover:opacity-80 transition-opacity"
                         >
                             <div class="w-9 h-9 sp-avatar">
-                                {{ post.user?.name?.charAt(0) ?? '?' }}
+                                {{ post.user?.name?.charAt(0) ?? "?" }}
                             </div>
                             <div>
-                                <p class="text-sm font-semibold leading-tight" style="color: var(--sp-text);">{{ post.user?.name }}</p>
-                                <p class="text-xs" style="color: var(--sp-text-3);">@{{ post.user?.username }}</p>
+                                <p
+                                    class="text-sm font-semibold leading-tight"
+                                    style="color: var(--sp-text)"
+                                >
+                                    {{ post.user?.name }}
+                                </p>
+                                <p
+                                    class="text-xs"
+                                    style="color: var(--sp-text-3)"
+                                >
+                                    @{{ post.user?.username }}
+                                </p>
                             </div>
                         </Link>
 
                         <!-- Content -->
-                        <p class="text-base leading-relaxed mb-4" style="color: var(--sp-text);">{{ post.content }}</p>
+                        <p
+                            v-if="post.content"
+                            class="text-base leading-relaxed mb-4"
+                            style="color: var(--sp-text)"
+                        >
+                            {{ post.content }}
+                        </p>
+                        <img
+                            v-if="post.image_path"
+                            :src="
+                                post.image_path
+                                    ? `/storage/${post.image_path}`
+                                    : ''
+                            "
+                            alt="Post image"
+                            class="w-full rounded-2xl object-cover mb-4"
+                        />
 
                         <!-- Actions row -->
-                        <div class="flex items-center gap-5 pt-3" style="border-top: 1px solid var(--sp-border);">
+                        <div
+                            class="flex items-center gap-5 pt-3"
+                            style="border-top: 1px solid var(--sp-border)"
+                        >
                             <!-- Like button -->
                             <button
                                 :id="`like-btn-${post.id}`"
@@ -256,59 +462,115 @@ const submitComment = (post) => {
                                 :disabled="likingPostId === post.id"
                                 class="flex items-center gap-1.5 text-xs font-medium transition-all duration-200 hover:scale-105"
                                 :class="post.isLiked ? 'text-red-400' : ''"
-                                :style="!post.isLiked ? { color: 'var(--sp-text-3)' } : {}"
+                                :style="
+                                    !post.isLiked
+                                        ? { color: 'var(--sp-text-3)' }
+                                        : {}
+                                "
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     class="w-4 h-4 transition-transform duration-200"
-                                    :class="post.isLiked ? 'fill-red-400 scale-110' : 'fill-none'"
+                                    :class="
+                                        post.isLiked
+                                            ? 'fill-red-400 scale-110'
+                                            : 'fill-none'
+                                    "
                                     viewBox="0 0 24 24"
                                     stroke="currentColor"
                                     stroke-width="1.8"
                                 >
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/>
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
+                                    />
                                 </svg>
                                 <span>{{ post.likes_count }}</span>
                             </button>
 
                             <!-- Comment count badge -->
-                            <span class="flex items-center gap-1.5 text-xs font-medium" style="color: var(--sp-text-3);">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/>
+                            <span
+                                class="flex items-center gap-1.5 text-xs font-medium"
+                                style="color: var(--sp-text-3)"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"
+                                    />
                                 </svg>
                                 {{ post.comments?.length ?? 0 }}
                             </span>
 
-                            <span class="text-xs ml-auto" style="color: var(--sp-text-3);">Just now</span>
+                            <span
+                                class="text-xs ml-auto"
+                                style="color: var(--sp-text-3)"
+                                >Just now</span
+                            >
                         </div>
 
                         <!-- Comments section -->
-                        <div class="mt-4 pt-4 space-y-2" style="border-top: 1px solid var(--sp-border);">
+                        <div
+                            class="mt-4 pt-4 space-y-2"
+                            style="border-top: 1px solid var(--sp-border)"
+                        >
                             <!-- Existing comments -->
                             <div
                                 v-for="comment in post.comments"
                                 :key="comment.id"
                                 class="flex items-start gap-2.5"
                             >
-                                <div class="w-6 h-6 sp-avatar text-[9px] flex-shrink-0">
-                                    {{ comment.user?.name?.charAt(0) ?? '?' }}
+                                <div
+                                    class="w-6 h-6 sp-avatar text-[9px] flex-shrink-0"
+                                >
+                                    {{ comment.user?.name?.charAt(0) ?? "?" }}
                                 </div>
-                                <div class="flex-1 rounded-xl px-3 py-2 text-sm" style="background-color: var(--sp-bg-2); border: 1px solid var(--sp-border);">
-                                    <span class="font-bold text-[#32cd32] text-xs">@{{ comment.user.username }}</span>
-                                    <span class="ml-1.5" style="color: var(--sp-text);">{{ comment.content }}</span>
+                                <div
+                                    class="flex-1 rounded-xl px-3 py-2 text-sm"
+                                    style="
+                                        background-color: var(--sp-bg-2);
+                                        border: 1px solid var(--sp-border);
+                                    "
+                                >
+                                    <span
+                                        class="font-bold text-[#32cd32] text-xs"
+                                        >@{{ comment.user.username }}</span
+                                    >
+                                    <span
+                                        class="ml-1.5"
+                                        style="color: var(--sp-text)"
+                                        >{{ comment.content }}</span
+                                    >
                                 </div>
                             </div>
 
                             <!-- Comment input -->
-                            <form @submit.prevent="submitComment(post)" class="flex items-center gap-2 mt-3">
-                                <div class="w-6 h-6 sp-avatar text-[9px] flex-shrink-0">
-                                    {{ $page.props.auth.user.name?.charAt(0) ?? '?' }}
+                            <form
+                                @submit.prevent="submitComment(post)"
+                                class="flex items-center gap-2 mt-3"
+                            >
+                                <div
+                                    class="w-6 h-6 sp-avatar text-[9px] flex-shrink-0"
+                                >
+                                    {{
+                                        $page.props.auth.user.name?.charAt(0) ??
+                                        "?"
+                                    }}
                                 </div>
                                 <input
                                     v-model="post.newComment"
                                     placeholder="Write a comment…"
                                     class="sp-input flex-1 text-sm py-2 px-3 rounded-full"
-                                    style="background-color: var(--sp-bg-2);"
+                                    style="background-color: var(--sp-bg-2)"
                                 />
                                 <button
                                     type="submit"
@@ -320,22 +582,34 @@ const submitComment = (post) => {
                         </div>
                     </article>
                 </div>
-
-            </div><!-- end LEFT -->
+            </div>
+            <!-- end LEFT -->
 
             <!-- ── RIGHT: SIDEBAR ─────────────────────── -->
             <aside class="hidden lg:block">
                 <div class="sticky top-24 space-y-5">
-
                     <!-- Who to follow -->
                     <div class="sp-glass-card p-5">
                         <div class="flex items-center gap-2 mb-4">
-                            <span class="w-1 h-4 rounded-full bg-[#32cd32]"></span>
-                            <h2 class="text-xs font-bold uppercase tracking-widest" style="color: var(--sp-text-3);">Who to follow</h2>
+                            <span
+                                class="w-1 h-4 rounded-full bg-[#32cd32]"
+                            ></span>
+                            <h2
+                                class="text-xs font-bold uppercase tracking-widest"
+                                style="color: var(--sp-text-3)"
+                            >
+                                Who to follow
+                            </h2>
                         </div>
 
                         <!-- No suggestions -->
-                        <div v-if="!suggestedUsers || suggestedUsers.length === 0" class="text-center py-6 text-sm" style="color: var(--sp-text-3);">
+                        <div
+                            v-if="
+                                !suggestedUsers || suggestedUsers.length === 0
+                            "
+                            class="text-center py-6 text-sm"
+                            style="color: var(--sp-text-3)"
+                        >
                             <div class="text-2xl mb-2">🎉</div>
                             You're following everyone!
                         </div>
@@ -349,13 +623,23 @@ const submitComment = (post) => {
                             >
                                 <!-- Avatar -->
                                 <div class="w-9 h-9 sp-avatar">
-                                    {{ user.name?.charAt(0) ?? '?' }}
+                                    {{ user.name?.charAt(0) ?? "?" }}
                                 </div>
 
                                 <!-- Name / username -->
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-semibold truncate" style="color: var(--sp-text);">{{ user.name }}</p>
-                                    <p class="text-xs truncate" style="color: var(--sp-text-3);">@{{ user.username }}</p>
+                                    <p
+                                        class="text-sm font-semibold truncate"
+                                        style="color: var(--sp-text)"
+                                    >
+                                        {{ user.name }}
+                                    </p>
+                                    <p
+                                        class="text-xs truncate"
+                                        style="color: var(--sp-text-3)"
+                                    >
+                                        @{{ user.username }}
+                                    </p>
                                 </div>
 
                                 <!-- Follow button -->
@@ -365,7 +649,11 @@ const submitComment = (post) => {
                                     :disabled="followingUserId === user.id"
                                     class="sp-btn-outline flex-shrink-0 text-[11px]"
                                 >
-                                    {{ followingUserId === user.id ? '…' : 'Follow' }}
+                                    {{
+                                        followingUserId === user.id
+                                            ? "…"
+                                            : "Follow"
+                                    }}
                                 </button>
                             </li>
                         </ul>
@@ -374,26 +662,60 @@ const submitComment = (post) => {
                     <!-- Quick stats card -->
                     <div class="sp-glass-card p-5">
                         <div class="flex items-center gap-2 mb-4">
-                            <span class="w-1 h-4 rounded-full bg-[#32cd32]"></span>
-                            <h2 class="text-xs font-bold uppercase tracking-widest" style="color: var(--sp-text-3);">Your Stats</h2>
+                            <span
+                                class="w-1 h-4 rounded-full bg-[#32cd32]"
+                            ></span>
+                            <h2
+                                class="text-xs font-bold uppercase tracking-widest"
+                                style="color: var(--sp-text-3)"
+                            >
+                                Your Stats
+                            </h2>
                         </div>
                         <div class="grid grid-cols-2 gap-3">
-                            <div class="rounded-xl p-3 text-center" style="background-color: var(--sp-bg-2); border: 1px solid var(--sp-border);">
-                                <div class="text-lg font-bold text-[#32cd32]">{{ posts?.length ?? 0 }}</div>
-                                <div class="text-[10px] uppercase tracking-widest mt-0.5" style="color: var(--sp-text-3);">Posts</div>
-                            </div>
-                            <div class="rounded-xl p-3 text-center" style="background-color: var(--sp-bg-2); border: 1px solid var(--sp-border);">
+                            <div
+                                class="rounded-xl p-3 text-center"
+                                style="
+                                    background-color: var(--sp-bg-2);
+                                    border: 1px solid var(--sp-border);
+                                "
+                            >
                                 <div class="text-lg font-bold text-[#32cd32]">
-                                    {{ posts?.reduce((s, p) => s + (p.likes_count ?? 0), 0) ?? 0 }}
+                                    {{ posts?.length ?? 0 }}
                                 </div>
-                                <div class="text-[10px] uppercase tracking-widest mt-0.5" style="color: var(--sp-text-3);">Likes</div>
+                                <div
+                                    class="text-[10px] uppercase tracking-widest mt-0.5"
+                                    style="color: var(--sp-text-3)"
+                                >
+                                    Posts
+                                </div>
+                            </div>
+                            <div
+                                class="rounded-xl p-3 text-center"
+                                style="
+                                    background-color: var(--sp-bg-2);
+                                    border: 1px solid var(--sp-border);
+                                "
+                            >
+                                <div class="text-lg font-bold text-[#32cd32]">
+                                    {{
+                                        posts?.reduce(
+                                            (s, p) => s + (p.likes_count ?? 0),
+                                            0,
+                                        ) ?? 0
+                                    }}
+                                </div>
+                                <div
+                                    class="text-[10px] uppercase tracking-widest mt-0.5"
+                                    style="color: var(--sp-text-3)"
+                                >
+                                    Likes
+                                </div>
                             </div>
                         </div>
                     </div>
-
                 </div>
             </aside>
-
         </main>
     </div>
 </template>
@@ -401,8 +723,13 @@ const submitComment = (post) => {
 <style scoped>
 /* Ensure the pulse animation is available */
 @keyframes pulse-glow {
-    0%, 100% { opacity: 0.6; }
-    50%       { opacity: 1; }
+    0%,
+    100% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
 }
 .animate-pulse-glow {
     animation: pulse-glow 2s ease-in-out infinite;
