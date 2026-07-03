@@ -34,6 +34,6 @@ Route::get('/', function () {
     ]);
 });
 
-
+Route::post('/users/{user}/follow', [FollowController::class, 'store'])->name('users.follow');
 // This line imports all the login/register/logout routes from Breeze
 require __DIR__.'/auth.php';

@@ -9,11 +9,24 @@ use Inertia\Inertia;
 class PostController extends Controller
 {
    public function index()
-    {
-        return Inertia::render('Dashboard', [
-            'posts' => Post::with('user:id,name,username')->latest()->get()
-        ]);
-    }
+{
+    $user = auth()->user();
+
+    // Get IDs of people the user follows
+    $followingIds = $user->following()->pluck('following_id');
+    
+    // Add the current user's own ID so they see their own posts
+    $followingIds->push($user->id);
+
+    $posts = Post::with('user:id,name,username')
+        ->whereIn('user_id', $followingIds)
+        ->latest()
+        ->get();
+
+    return Inertia::render('Dashboard', [
+        'posts' => $posts,
+    ]);
+}
 
     public function store(Request $request)
     {
