@@ -12,7 +12,7 @@ class PublicProfileController extends Controller
         $user = User::where('username', $username)->firstOrFail();
         
         $posts = $user->posts()
-            ->with(['user:id,name,username', 'comments.user:id,username'])
+            ->with(['user:id,name,username', 'comments.user:id,name,username'])
             ->latest()
             ->get()
             ->map(function ($post) {

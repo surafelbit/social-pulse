@@ -12,13 +12,14 @@ class PostController extends Controller
         $user = auth()->user();
         $followingIds = $user->following()->pluck('following_id')->push($user->id);
 
-        $posts = \App\Models\Post::with(['user:id,name,username', 'comments.user:id,username'])
+        $posts = \App\Models\Post::with(['user:id,name,username', 'comments.user:id,name,username'])
             ->whereIn('user_id', $followingIds)
             ->latest()
             ->get()
             ->map(function ($post) use ($user) {
                 $post->isLiked = $post->likes()->where('user_id', $user->id)->exists();
                 $post->likes_count = $post->likes()->count();
+                $post->newComment = '';
                 return $post;
             });
 

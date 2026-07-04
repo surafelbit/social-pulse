@@ -12,14 +12,12 @@ use App\Http\Controllers\PublicProfileController;
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [PostController::class, 'index'])->name('dashboard');
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+    Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('posts.comments.store');
 
-    // Likes routes
     Route::post('/likes', [LikeController::class, 'store'])->name('likes.store');
     Route::delete('/likes/{post}', [LikeController::class, 'destroy'])->name('likes.destroy');
 
-    // Follow routes
     Route::post('/users/{user}/follow', [FollowController::class, 'toggle'])->name('users.follow');
-    // Profile routes
 Route::get('/profile/{username}', [PublicProfileController::class, 'show'])->name('profile.show');
 });
 
@@ -31,5 +29,4 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 });
-// This line imports all the login/register/logout routes from Breeze
 require __DIR__.'/auth.php';
