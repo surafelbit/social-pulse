@@ -757,12 +757,10 @@ const deletePost = (postId) => {
                                 :key="user.id"
                                 class="flex items-center gap-3 sp-suggest-row"
                             >
-                                <!-- Avatar -->
                                 <div class="w-9 h-9 sp-avatar">
                                     {{ user.name?.charAt(0) ?? "?" }}
                                 </div>
 
-                                <!-- Name / username -->
                                 <div class="flex-1 min-w-0">
                                     <p
                                         class="text-sm font-semibold truncate"
@@ -957,7 +955,6 @@ const deletePost = (postId) => {
     100% { background-position: -200% 0; }
 }
 
-/* ── Feed list stagger transitions ────────────────────── */
 .feed-move,
 .feed-enter-active,
 .feed-leave-active {
