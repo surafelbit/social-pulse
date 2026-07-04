@@ -53,4 +53,31 @@ class PostController extends Controller
 
         return redirect()->route('dashboard');
     }
+
+    public function update(Request $request, \App\Models\Post $post)
+    {
+        abort_if($post->user_id !== auth()->id(), 403);
+
+        $validated = $request->validate([
+            'content' => ['nullable', 'string', 'max:280'],
+        ]);
+
+        $post->update(['content' => $validated['content'] ?? $post->content]);
+
+        return back();
+    }
+
+    public function destroy(\App\Models\Post $post)
+    {
+        abort_if($post->user_id !== auth()->id(), 403);
+
+        // Delete stored image if present
+        if ($post->image_path) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($post->image_path);
+        }
+
+        $post->delete();
+
+        return back();
+    }
 }

@@ -12,6 +12,8 @@ use App\Http\Controllers\PublicProfileController;
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [PostController::class, 'index'])->name('dashboard');
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+    Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
+    Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
     Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('posts.comments.store');
 
     Route::post('/likes', [LikeController::class, 'store'])->name('likes.store');

@@ -143,6 +143,57 @@ const submitComment = (post) => {
         },
     );
 };
+
+// ── Edit / Delete ─────────────────────────────────────────────
+const openMenuPostId = ref(null);
+const editingPost = ref(null);   // { id, content } — null when not editing
+const deletingPostId = ref(null);
+
+const toggleMenu = (postId) => {
+    openMenuPostId.value = openMenuPostId.value === postId ? null : postId;
+};
+
+const startEdit = (post) => {
+    editingPost.value = { id: post.id, content: post.content };
+    openMenuPostId.value = null;
+};
+
+const cancelEdit = () => { editingPost.value = null; };
+
+const saveEdit = (post) => {
+    router.put(
+        route('posts.update', post.id),
+        { content: editingPost.value.content },
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                post.content = editingPost.value.content;
+                editingPost.value = null;
+                window.showToast('Post updated!');
+            },
+        },
+    );
+};
+
+const confirmDelete = (postId) => {
+    deletingPostId.value = postId;
+    openMenuPostId.value = null;
+};
+
+const cancelDelete = () => { deletingPostId.value = null; };
+
+const deletePost = (postId) => {
+    router.delete(
+        route('posts.destroy', postId),
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                deletingPostId.value = null;
+                window.showToast('Post deleted.', 'error');
+            },
+        },
+    );
+};
 </script>
 
 <template>
@@ -431,32 +482,86 @@ const submitComment = (post) => {
                         class="sp-glass-card p-5 group"
                     >
                         <!-- User info row -->
-                        <Link
-                            :href="route('profile.show', post.user.username)"
-                            class="flex items-center gap-3 mb-4 hover:opacity-80 transition-opacity"
-                        >
-                            <div class="w-9 h-9 sp-avatar">
-                                {{ post.user?.name?.charAt(0) ?? "?" }}
-                            </div>
-                            <div>
-                                <p
-                                    class="text-sm font-semibold leading-tight"
-                                    style="color: var(--sp-text)"
-                                >
-                                    {{ post.user?.name }}
-                                </p>
-                                <p
-                                    class="text-xs"
-                                    style="color: var(--sp-text-3)"
-                                >
-                                    @{{ post.user?.username }}
-                                </p>
-                            </div>
-                        </Link>
+                        <div class="flex items-center justify-between mb-4">
+                            <Link
+                                :href="route('profile.show', post.user.username)"
+                                class="flex items-center gap-3 hover:opacity-80 transition-opacity"
+                            >
+                                <div class="w-9 h-9 sp-avatar">
+                                    {{ post.user?.name?.charAt(0) ?? "?" }}
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold leading-tight" style="color: var(--sp-text)">
+                                        {{ post.user?.name }}
+                                    </p>
+                                    <p class="text-xs" style="color: var(--sp-text-3)">
+                                        @{{ post.user?.username }}
+                                    </p>
+                                </div>
+                            </Link>
 
-                        <!-- Content -->
+                            <!-- 3-dot menu — only for post owner -->
+                            <div v-if="post.user?.id === $page.props.auth.user.id" class="relative">
+                                <button
+                                    @click.stop="toggleMenu(post.id)"
+                                    class="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:bg-[#32cd32]/10"
+                                    style="color: var(--sp-text-3);"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                        <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+                                    </svg>
+                                </button>
+                                <!-- Dropdown -->
+                                <Transition name="dropdown">
+                                    <div
+                                        v-if="openMenuPostId === post.id"
+                                        class="absolute right-0 top-9 z-20 w-36 rounded-xl overflow-hidden shadow-2xl"
+                                        style="background: var(--sp-card); border: 1px solid var(--sp-border);"
+                                    >
+                                        <button
+                                            @click="startEdit(post)"
+                                            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-left transition-colors hover:bg-[#32cd32]/10 hover:text-[#32cd32]"
+                                            style="color: var(--sp-text);"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125"/>
+                                            </svg>
+                                            Edit
+                                        </button>
+                                        <button
+                                            @click="confirmDelete(post.id)"
+                                            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-left transition-colors hover:bg-red-500/10 hover:text-red-400"
+                                            style="color: var(--sp-text-3);"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+                                            </svg>
+                                            Delete
+                                        </button>
+                                    </div>
+                                </Transition>
+                            </div>
+                        </div>
+
+                        <!-- Inline edit mode -->
+                        <div v-if="editingPost?.id === post.id" class="mb-4">
+                            <textarea
+                                v-model="editingPost.content"
+                                rows="3"
+                                maxlength="280"
+                                class="sp-input text-sm w-full"
+                                style="background-color: var(--sp-bg-2);"
+                            ></textarea>
+                            <div class="flex items-center gap-2 mt-2">
+                                <button @click="saveEdit(post)" class="sp-btn-primary text-xs py-1.5 px-4">Save</button>
+                                <button @click="cancelEdit" class="sp-btn-outline text-xs py-1 px-3 border-gray-400 text-gray-400 hover:bg-gray-400/10">Cancel</button>
+                                <span class="text-xs font-mono ml-auto" style="color: var(--sp-text-3);">{{ editingPost.content?.length ?? 0 }}/280</span>
+                            </div>
+                        </div>
+
+                        <!-- Content (read mode) -->
                         <p
-                            v-if="post.content"
+                            v-else-if="post.content"
                             class="text-base leading-relaxed mb-4"
                             style="color: var(--sp-text)"
                         >
@@ -741,21 +846,72 @@ const submitComment = (post) => {
             </aside>
         </main>
         <ToastContainer />
+
+        <!-- Delete confirmation modal -->
+        <Transition name="modal-fade">
+            <div
+                v-if="deletingPostId !== null"
+                class="fixed inset-0 z-[90] flex items-center justify-center p-4"
+                style="background: rgba(0,0,0,0.6); backdrop-filter: blur(6px);"
+                @click.self="cancelDelete"
+            >
+                <div
+                    class="w-full max-w-sm rounded-2xl p-6 shadow-2xl animate-rise-in"
+                    style="background: var(--sp-card); border: 1px solid var(--sp-border);"
+                >
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" style="background: rgba(239,68,68,0.15);">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-center font-bold text-base mb-1" style="color: var(--sp-text);">Delete post?</h3>
+                    <p class="text-center text-sm mb-6" style="color: var(--sp-text-3);">This action cannot be undone.</p>
+                    <div class="flex gap-3">
+                        <button
+                            @click="cancelDelete"
+                            class="flex-1 py-2 rounded-xl text-sm font-semibold transition-colors"
+                            style="background: var(--sp-bg-2); color: var(--sp-text); border: 1px solid var(--sp-border);"
+                        >Cancel</button>
+                        <button
+                            @click="deletePost(deletingPostId)"
+                            class="flex-1 py-2 rounded-xl text-sm font-semibold text-white transition-colors"
+                            style="background: linear-gradient(135deg, #ef4444, #b91c1c);"
+                        >Delete</button>
+                    </div>
+                </div>
+            </div>
+        </Transition>
     </div>
 </template>
 
 <style scoped>
-/* Ensure the pulse animation is available */
+/* Pulse animation */
 @keyframes pulse-glow {
-    0%,
-    100% {
-        opacity: 0.6;
-    }
-    50% {
-        opacity: 1;
-    }
+    0%, 100% { opacity: 0.6; }
+    50%       { opacity: 1;   }
 }
 .animate-pulse-glow {
     animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Dropdown transition */
+.dropdown-enter-active,
+.dropdown-leave-active {
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.dropdown-enter-from,
+.dropdown-leave-to {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+}
+
+/* Modal fade */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+    transition: opacity 0.2s ease;
+}
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+    opacity: 0;
 }
 </style>
