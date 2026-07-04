@@ -1,6 +1,16 @@
 <script setup>
 import { ref } from "vue";
 import { Link, router, useForm } from "@inertiajs/vue3";
+import UserSearch from "../Components/UserSearch.vue";
+import ToastContainer from "../Components/ToastContainer.vue";
+
+if (typeof window !== "undefined") {
+    window.showToast = (message, type = "success") => {
+        window.dispatchEvent(
+            new CustomEvent("show-toast", { detail: { message, type } }),
+        );
+    };
+}
 
 const selectedImagePreview = ref("");
 
@@ -46,6 +56,7 @@ const submit = () => {
         onSuccess: () => {
             form.reset();
             selectedImagePreview.value = "";
+            window.showToast("Post shared successfully!");
         },
     });
 };
@@ -72,6 +83,9 @@ const toggleLike = (post) => {
     if (post.isLiked) {
         router.delete(route("likes.destroy", post.id), {
             preserveScroll: true,
+            onSuccess: () => {
+                window.showToast("Removed like");
+            },
             onFinish: () => {
                 likingPostId.value = null;
             },
@@ -82,6 +96,9 @@ const toggleLike = (post) => {
             { post_id: post.id },
             {
                 preserveScroll: true,
+                onSuccess: () => {
+                    window.showToast("Post liked!");
+                },
                 onFinish: () => {
                     likingPostId.value = null;
                 },
@@ -100,6 +117,9 @@ const followUser = (user) => {
         {},
         {
             preserveScroll: true,
+            onSuccess: () => {
+                window.showToast(`Followed @${user.username}!`);
+            },
             onFinish: () => {
                 followingUserId.value = null;
             },
@@ -116,7 +136,10 @@ const submitComment = (post) => {
         },
         {
             preserveScroll: true,
-            onSuccess: () => (post.newComment = ""),
+            onSuccess: () => {
+                post.newComment = "";
+                window.showToast("Comment posted!");
+            },
         },
     );
 };
@@ -144,6 +167,9 @@ const submitComment = (post) => {
                         Social<span class="sp-gradient-text">Pulse</span>
                     </span>
                 </div>
+
+                <!-- User Search Bar -->
+                <UserSearch />
 
                 <!-- Right side nav -->
                 <nav class="flex items-center gap-3 md:gap-5">
@@ -714,6 +740,7 @@ const submitComment = (post) => {
                 </div>
             </aside>
         </main>
+        <ToastContainer />
     </div>
 </template>
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class PublicProfileController extends Controller
@@ -27,5 +28,32 @@ class PublicProfileController extends Controller
             'posts' => $posts,
             'isFollowing' => auth()->user()->following()->where('following_id', $user->id)->exists(),
         ]);
+    }
+
+    public function search(Request $request)
+    {
+        $query = $request->query('query');
+        if (blank($query)) {
+            return response()->json([]);
+        }
+
+        $users = User::where('name', 'like', "%{$query}%")
+            ->orWhere('username', 'like', "%{$query}%")
+            ->limit(5)
+            ->get(['id', 'name', 'username']);
+
+        return response()->json($users);
+    }
+
+    public function updateBio(Request $request)
+    {
+        $request->validate([
+            'bio' => ['nullable', 'string', 'max:160'],
+        ]);
+
+        $user = auth()->user();
+        $user->update(['bio' => $request->bio]);
+
+        return back();
     }
 }

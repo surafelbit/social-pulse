@@ -19,6 +19,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('/users/{user}/follow', [FollowController::class, 'toggle'])->name('users.follow');
 Route::get('/profile/{username}', [PublicProfileController::class, 'show'])->name('profile.show');
+    Route::get('/users/search', [PublicProfileController::class, 'search'])->name('users.search');
+    Route::patch('/profile/bio', [PublicProfileController::class, 'updateBio'])->name('profile.bio.update');
 });
 
 Route::get('/', function () {
