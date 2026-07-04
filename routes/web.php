@@ -20,7 +20,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/likes/{post}', [LikeController::class, 'destroy'])->name('likes.destroy');
 
     Route::post('/users/{user}/follow', [FollowController::class, 'toggle'])->name('users.follow');
-Route::get('/profile/{username}', [PublicProfileController::class, 'show'])->name('profile.show');
+    
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    
+    Route::get('/profile/{username}', [PublicProfileController::class, 'show'])->name('profile.show');
     Route::get('/users/search', [PublicProfileController::class, 'search'])->name('users.search');
     Route::patch('/profile/bio', [PublicProfileController::class, 'updateBio'])->name('profile.bio.update');
 });

@@ -4,7 +4,13 @@ import { router, Link } from '@inertiajs/vue3';
 import UserSearch from '../Components/UserSearch.vue';
 import ToastContainer from '../Components/ToastContainer.vue';
 
-const props = defineProps({ profileUser: Object, posts: Array, isFollowing: Boolean });
+const props = defineProps({
+    profileUser: Object,
+    posts: Array,
+    isFollowing: Boolean,
+    followers: Array,
+    following: Array
+});
 
 if (typeof window !== 'undefined' && !window.showToast) {
     window.showToast = (message, type = 'success') => {
@@ -54,6 +60,39 @@ const goBack = () => window.history.back();
 const lightboxSrc = ref(null);
 const openLightbox = (src) => { lightboxSrc.value = src; };
 const closeLightbox = () => { lightboxSrc.value = null; };
+
+// Followers/Following Modal State
+const activeModal = ref(null); // 'followers' or 'following' or null
+const modalSearchQuery = ref('');
+
+const openModal = (type) => {
+    activeModal.value = type;
+    modalSearchQuery.value = '';
+};
+
+const closeModal = () => {
+    activeModal.value = null;
+    modalSearchQuery.value = '';
+};
+
+const filteredModalUsers = computed(() => {
+    const list = activeModal.value === 'followers' ? (props.followers ?? []) : (props.following ?? []);
+    if (!modalSearchQuery.value.trim()) return list;
+    const q = modalSearchQuery.value.toLowerCase();
+    return list.filter(u =>
+        u.name?.toLowerCase().includes(q) ||
+        u.username?.toLowerCase().includes(q)
+    );
+});
+
+const toggleFollowUser = (user) => {
+    router.post(route('users.follow', user.id), {}, {
+        preserveScroll: true,
+        onSuccess: () => {
+            window.showToast(user.isFollowing ? `Unfollowed @${user.username}` : `Followed @${user.username}`);
+        }
+    });
+};
 </script>
 
 <template>
@@ -116,20 +155,25 @@ const closeLightbox = () => { lightboxSrc.value = null; };
                         </div>
                     </div>
                     <!-- Stats -->
-                    <div class="flex items-center gap-6 mt-4 pt-4" style="border-top: 1px solid var(--sp-border);">
-                        <div class="text-center">
+                    <div class="flex items-center justify-around gap-2 mt-4 pt-4" style="border-top: 1px solid var(--sp-border);">
+                        <div class="text-center flex-1">
                             <div class="text-lg font-bold text-[#32cd32]">{{ posts?.length ?? 0 }}</div>
                             <div class="text-[10px] uppercase tracking-widest" style="color: var(--sp-text-3);">Posts</div>
                         </div>
                         <div class="w-px h-6" style="background-color: var(--sp-border);"></div>
-                        <div class="text-center">
+                        <button @click="openModal('followers')" class="text-center flex-1 hover:opacity-80 transition-opacity focus:outline-none">
+                            <div class="text-lg font-bold text-[#32cd32]">{{ followers?.length ?? 0 }}</div>
+                            <div class="text-[10px] uppercase tracking-widest" style="color: var(--sp-text-3);">Followers</div>
+                        </button>
+                        <div class="w-px h-6" style="background-color: var(--sp-border);"></div>
+                        <button @click="openModal('following')" class="text-center flex-1 hover:opacity-80 transition-opacity focus:outline-none">
+                            <div class="text-lg font-bold text-[#32cd32]">{{ following?.length ?? 0 }}</div>
+                            <div class="text-[10px] uppercase tracking-widest" style="color: var(--sp-text-3);">Following</div>
+                        </button>
+                        <div class="w-px h-6" style="background-color: var(--sp-border);"></div>
+                        <div class="text-center flex-1">
                             <div class="text-lg font-bold text-[#32cd32]">{{ posts?.reduce((s, p) => s + (p.likes_count ?? 0), 0) ?? 0 }}</div>
                             <div class="text-[10px] uppercase tracking-widest" style="color: var(--sp-text-3);">Likes</div>
-                        </div>
-                        <div class="w-px h-6" style="background-color: var(--sp-border);"></div>
-                        <div class="text-center">
-                            <div class="text-lg font-bold text-[#32cd32]">{{ mediaPosts.length }}</div>
-                            <div class="text-[10px] uppercase tracking-widest" style="color: var(--sp-text-3);">Media</div>
                         </div>
                     </div>
                 </div>
@@ -221,6 +265,82 @@ const closeLightbox = () => { lightboxSrc.value = null; };
             </div>
         </Transition>
 
+        <!-- FOLLOWERS/FOLLOWING MODAL -->
+        <Transition name="modal-fade">
+            <div v-if="activeModal" class="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md" @click.self="closeModal">
+                <div class="w-full max-w-md rounded-2xl overflow-hidden shadow-2xl sp-glass-card animate-scale-up" style="background-color: var(--sp-card); border: 1px solid var(--sp-border);">
+                    <!-- Modal Header -->
+                    <div class="px-5 py-4 flex items-center justify-between border-b" style="border-color: var(--sp-border);">
+                        <h3 class="font-headline font-bold text-lg capitalize" style="color: var(--sp-text);">
+                            {{ activeModal }}
+                        </h3>
+                        <button @click="closeModal" class="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:bg-red-500/10 hover:text-red-400" style="color: var(--sp-text-3); border: 1px solid var(--sp-border);">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Search Input -->
+                    <div class="p-4 border-b" style="border-color: var(--sp-border);">
+                        <div class="relative">
+                            <input
+                                v-model="modalSearchQuery"
+                                type="text"
+                                :placeholder="`Search ${activeModal}...`"
+                                class="w-full sp-input pl-10 pr-4 py-2 text-sm rounded-xl focus:outline-none"
+                                style="background-color: var(--sp-bg-2); border-color: var(--sp-border);"
+                            />
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 absolute left-3 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="color: var(--sp-text-3);">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Modal Body / User List -->
+                    <div class="max-h-[350px] overflow-y-auto p-4 space-y-4">
+                        <div v-if="filteredModalUsers.length === 0" class="text-center py-10">
+                            <div class="text-3xl mb-2">🔍</div>
+                            <p class="text-sm font-semibold" style="color: var(--sp-text);">No users found</p>
+                            <p class="text-xs mt-1" style="color: var(--sp-text-3);">Try searching for another name or username.</p>
+                        </div>
+                        <div v-else class="space-y-3.5">
+                            <div v-for="user in filteredModalUsers" :key="user.id" class="flex items-center justify-between gap-3">
+                                <!-- User info link -->
+                                <Link
+                                    :href="route('profile.show', user.username)"
+                                    @click="closeModal"
+                                    class="flex items-center gap-3 hover:opacity-85 transition-opacity flex-1 min-w-0"
+                                >
+                                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white uppercase shadow-sm flex-shrink-0" style="background: linear-gradient(135deg, #32cd32 0%, #006e0a 100%);">
+                                        {{ user.name?.charAt(0) ?? '?' }}
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-semibold truncate" style="color: var(--sp-text);">
+                                            {{ user.name }}
+                                        </p>
+                                        <p class="text-xs truncate" style="color: var(--sp-text-3);">
+                                            @{{ user.username }}
+                                        </p>
+                                    </div>
+                                </Link>
+
+                                <!-- Action button: follow/unfollow (exclude logged in user) -->
+                                <button
+                                    v-if="user.id !== $page.props.auth.user.id"
+                                    @click="toggleFollowUser(user)"
+                                    class="px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 flex-shrink-0"
+                                    :class="user.isFollowing ? 'border border-[#32cd32] text-[#32cd32] hover:bg-red-500/10 hover:border-red-400 hover:text-red-400' : 'sp-btn-primary'"
+                                >
+                                    {{ user.isFollowing ? 'Following' : 'Follow' }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Transition>
+
         <ToastContainer />
     </div>
 </template>
@@ -274,6 +394,22 @@ const closeLightbox = () => { lightboxSrc.value = null; };
 }
 @keyframes lb-zoom-in {
     from { transform: scale(0.85); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
+}
+
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+    transition: opacity 0.25s ease;
+}
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+    opacity: 0;
+}
+.animate-scale-up {
+    animation: modal-scale-up 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes modal-scale-up {
+    from { transform: scale(0.9); opacity: 0; }
     to   { transform: scale(1);    opacity: 1; }
 }
 </style>

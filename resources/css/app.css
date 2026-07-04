@@ -8,44 +8,46 @@
 
 /* ─── CSS Custom Properties ────────────────────────────────── */
 :root {
-    /* Light Mode */
-    --sp-bg: #ffffff;
-    --sp-bg-2: #f5f5f5;
-    --sp-bg-3: #ebebeb;
-    --sp-surface: #ffffff;
-    --sp-card: #f9f9f9;
-    --sp-border: #e8e8e8;
-    --sp-border-2: #d4d4d4;
-    --sp-text: #0d0d0d;
-    --sp-text-2: #4a4a4a;
-    --sp-text-3: #9ca3af;
-    --sp-primary: #32cd32;
-    --sp-primary-dark: #006e0a;
-    --sp-primary-glow: rgba(50, 205, 50, 0.25);
-    --sp-primary-soft: rgba(50, 205, 50, 0.1);
-    --sp-on-primary: #000000;
+    /* Light Mode (Tuned Forest off-white) */
+    --sp-bg: hsl(120, 8%, 98.5%);
+    --sp-bg-2: hsl(120, 6%, 95%);
+    --sp-bg-3: hsl(120, 6%, 91%);
+    --sp-surface: hsl(120, 8%, 98.5%);
+    --sp-card: hsl(120, 6%, 97%);
+    --sp-border: hsl(120, 5%, 90%);
+    --sp-border-2: hsl(120, 4%, 82%);
+    --sp-text: hsl(120, 10%, 6%);
+    --sp-text-2: hsl(120, 5%, 32%);
+    --sp-text-3: hsl(120, 3%, 62%);
+    --sp-primary: hsl(120, 50%, 45%);
+    --sp-primary-dark: hsl(120, 55%, 32%);
+    --sp-primary-glow: rgba(45, 180, 45, 0.15);
+    --sp-primary-soft: rgba(45, 180, 45, 0.08);
+    --sp-on-primary: #ffffff;
 
     /* Transition */
     --sp-transition:
-        background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dark {
-    /* Dark Mode */
-    --sp-bg: #0d0d0d;
-    --sp-bg-2: #161616;
-    --sp-bg-3: #1f1f1f;
-    --sp-surface: #141414;
-    --sp-card: #1a1a1a;
-    --sp-border: #2a2a2a;
-    --sp-border-2: #3a3a3a;
-    --sp-text: #f0f0f0;
-    --sp-text-2: #a0a0a0;
-    --sp-text-3: #555555;
-    --sp-primary: #32cd32;
-    --sp-primary-dark: #4ce346;
-    --sp-primary-glow: rgba(50, 205, 50, 0.2);
-    --sp-primary-soft: rgba(50, 205, 50, 0.08);
+    /* Dark Mode (Forest tinted deep blacks) */
+    --sp-bg: hsl(120, 6%, 8%);
+    --sp-bg-2: hsl(120, 5%, 12%);
+    --sp-bg-3: hsl(120, 5%, 16%);
+    --sp-surface: hsl(120, 6%, 10%);
+    --sp-card: hsl(120, 5%, 10.5%);
+    --sp-border: hsl(120, 4%, 18%);
+    --sp-border-2: hsl(120, 4%, 25%);
+    --sp-text: hsl(120, 4%, 94%);
+    --sp-text-2: hsl(120, 3%, 68%);
+    --sp-text-3: hsl(120, 2%, 42%);
+    --sp-primary: hsl(120, 42%, 56%);
+    --sp-primary-dark: hsl(120, 40%, 45%);
+    --sp-primary-glow: rgba(98, 216, 98, 0.08);
+    --sp-primary-soft: rgba(98, 216, 98, 0.04);
     --sp-on-primary: #000000;
 }
 
@@ -92,39 +94,52 @@ body {
         color: var(--sp-text-3);
     }
 
-    /* Lime-accented card */
+    /* Glass card */
     .sp-glass-card {
         background-color: var(--sp-card);
         border: 1px solid var(--sp-border);
-        border-radius: 1rem;
+        border-radius: 1.5rem;
         transition:
-            border-color 0.25s ease,
-            box-shadow 0.25s ease,
-            transform 0.25s ease;
+            border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+            box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+            background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+            transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .sp-glass-card:hover {
-        border-color: rgba(50, 205, 50, 0.35);
-        box-shadow: 0 8px 32px var(--sp-primary-glow);
+        border-color: rgba(98, 216, 98, 0.35);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 32px var(--sp-primary-glow);
+    }
+    .dark .sp-glass-card:hover {
+        box-shadow: none;
+        background-color: hsl(120, 5%, 13%);
+        border-color: rgba(98, 216, 98, 0.45);
     }
 
     /* Primary button */
     .sp-btn-primary {
-        background: linear-gradient(135deg, #32cd32 0%, #28a828 100%);
-        color: #000;
+        background: linear-gradient(135deg, var(--sp-primary) 0%, var(--sp-primary-dark) 100%);
+        color: var(--sp-on-primary);
         font-weight: 700;
         border-radius: 9999px;
         padding: 0.5rem 1.5rem;
+        border: none;
+        cursor: pointer;
         transition:
-            box-shadow 0.2s ease,
-            transform 0.15s ease,
+            box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+            transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
             opacity 0.2s ease;
     }
     .sp-btn-primary:hover {
-        box-shadow: 0 0 20px rgba(50, 205, 50, 0.45);
-        transform: translateY(-1px);
+        transform: translateY(-1px) scale(1.02);
+        box-shadow: 0 6px 20px var(--sp-primary-glow);
+    }
+    .dark .sp-btn-primary:hover {
+        box-shadow: none;
+        filter: brightness(1.1);
     }
     .sp-btn-primary:active {
-        transform: scale(0.96);
+        transform: scale(0.97);
     }
     .sp-btn-primary:disabled {
         opacity: 0.45;
@@ -135,34 +150,41 @@ body {
 
     /* Outline button */
     .sp-btn-outline {
-        border: 1.5px solid rgba(50, 205, 50, 0.55);
-        color: #32cd32;
+        border: 1.5px solid var(--sp-primary);
+        color: var(--sp-primary);
         font-weight: 700;
         border-radius: 9999px;
         padding: 0.375rem 0.875rem;
-        transition: all 0.2s ease;
+        transition:
+            background-color 0.2s ease,
+            color 0.2s ease,
+            border-color 0.2s ease,
+            transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
         background: transparent;
         font-size: 0.75rem;
+        cursor: pointer;
     }
     .sp-btn-outline:hover {
-        background: #32cd32;
-        color: #000;
-        border-color: #32cd32;
+        background: var(--sp-primary);
+        color: var(--sp-on-primary);
+        border-color: var(--sp-primary);
+        transform: translateY(-1px);
     }
     .sp-btn-outline:active {
-        transform: scale(0.95);
+        transform: scale(0.96);
     }
 
     /* Theme input */
     .sp-input {
-        background-color: var(--sp-bg);
+        background-color: var(--sp-bg-2);
         border: 1px solid var(--sp-border);
         color: var(--sp-text);
-        border-radius: 0.5rem;
+        border-radius: 0.75rem;
         padding: 0.625rem 1rem;
         transition:
-            border-color 0.2s ease,
-            box-shadow 0.2s ease;
+            border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+            box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+            background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         outline: none;
         width: 100%;
     }
@@ -170,17 +192,26 @@ body {
         color: var(--sp-text-3);
     }
     .sp-input:focus {
-        border-color: #32cd32;
-        box-shadow: 0 0 0 3px rgba(50, 205, 50, 0.15);
+        border-color: var(--sp-primary);
+        background-color: var(--sp-bg);
+        box-shadow: 0 0 0 3px var(--sp-primary-glow);
+    }
+    .dark .sp-input:focus {
+        box-shadow: none;
+        border-color: var(--sp-primary);
+        background-color: var(--sp-bg-2);
     }
 
     /* Nav header */
     .sp-header {
-        background-color: var(--sp-bg);
+        background-color: rgba(250, 251, 250, 0.75);
         border-bottom: 1px solid var(--sp-border);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
         transition: var(--sp-transition);
+    }
+    .dark .sp-header {
+        background-color: rgba(18, 20, 18, 0.75);
     }
 
     /* Gradient text */

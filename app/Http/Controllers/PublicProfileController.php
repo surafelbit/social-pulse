@@ -23,10 +23,28 @@ class PublicProfileController extends Controller
                 return $post;
             });
 
+        $authFollowingIds = auth()->user()->following()->pluck('following_id')->toArray();
+
+        $followers = $user->followers()
+            ->get(['users.id', 'users.name', 'users.username'])
+            ->map(function ($f) use ($authFollowingIds) {
+                $f->isFollowing = in_array($f->id, $authFollowingIds);
+                return $f;
+            });
+
+        $following = $user->following()
+            ->get(['users.id', 'users.name', 'users.username'])
+            ->map(function ($f) use ($authFollowingIds) {
+                $f->isFollowing = in_array($f->id, $authFollowingIds);
+                return $f;
+            });
+
         return Inertia::render('PublicProfile', [
             'profileUser' => $user,
             'posts' => $posts,
             'isFollowing' => auth()->user()->following()->where('following_id', $user->id)->exists(),
+            'followers' => $followers,
+            'following' => $following,
         ]);
     }
 

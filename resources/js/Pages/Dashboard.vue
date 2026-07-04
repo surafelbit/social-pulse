@@ -1,8 +1,16 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { Link, router, useForm } from "@inertiajs/vue3";
 import UserSearch from "../Components/UserSearch.vue";
 import ToastContainer from "../Components/ToastContainer.vue";
+
+// Header scroll shadow
+const scrolled = ref(false);
+const handleScroll = () => {
+    scrolled.value = window.scrollY > 8;
+};
+onMounted(() => window.addEventListener("scroll", handleScroll, { passive: true }));
+onUnmounted(() => window.removeEventListener("scroll", handleScroll));
 
 if (typeof window !== "undefined") {
     window.showToast = (message, type = "success") => {
@@ -202,7 +210,7 @@ const deletePost = (postId) => {
         style="background-color: var(--sp-bg); color: var(--sp-text)"
     >
         <!-- ── HEADER ─────────────────────────────────── -->
-        <header class="sticky top-0 z-50 sp-header">
+        <header class="sticky top-0 z-50 sp-header" :class="{ 'sp-header--scrolled': scrolled }">
             <div
                 class="max-w-6xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between gap-4"
             >
@@ -266,7 +274,7 @@ const deletePost = (postId) => {
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
-                            stroke-width="2"
+                            stroke-width="1.8"
                         >
                             <path
                                 stroke-linecap="round"
@@ -282,7 +290,7 @@ const deletePost = (postId) => {
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
-                            stroke-width="2"
+                            stroke-width="1.8"
                         >
                             <path
                                 stroke-linecap="round"
@@ -305,7 +313,7 @@ const deletePost = (postId) => {
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
-                            stroke-width="2"
+                            stroke-width="1.8"
                         >
                             <path
                                 stroke-linecap="round"
@@ -326,9 +334,9 @@ const deletePost = (postId) => {
             <!-- ── LEFT: FEED ─────────────────────────── -->
             <div class="space-y-5">
                 <!-- Post Composer -->
-                <div class="sp-glass-card p-5 shadow-sm animate-rise-in">
+                <div class="sp-glass-card sp-composer p-5 shadow-sm animate-rise-in">
                     <!-- Lime accent top bar -->
-                    <div class="sp-accent-bar mb-4 rounded-full"></div>
+                    <div class="sp-accent-bar sp-accent-shimmer mb-4 rounded-full"></div>
 
                     <form @submit.prevent="submit">
                         <div class="flex items-start gap-3">
@@ -352,7 +360,7 @@ const deletePost = (postId) => {
 
                         <div
                             v-if="selectedImagePreview"
-                            class="mt-3 rounded-2xl overflow-hidden border"
+                            class="mt-3 rounded-xl overflow-hidden border"
                             style="border-color: var(--sp-border)"
                         >
                             <img
@@ -444,7 +452,7 @@ const deletePost = (postId) => {
                     class="text-center py-20 animate-rise-in"
                 >
                     <div
-                        class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
+                        class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center sp-empty-icon"
                         style="
                             background-color: var(--sp-card);
                             border: 1px solid var(--sp-border);
@@ -456,7 +464,7 @@ const deletePost = (postId) => {
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
-                            stroke-width="1.5"
+                            stroke-width="1.8"
                             style="color: var(--sp-text-3)"
                         >
                             <path
@@ -475,11 +483,11 @@ const deletePost = (postId) => {
                 </div>
 
                 <!-- Feed posts -->
-                <div v-else class="space-y-4">
+                <TransitionGroup v-else name="feed" tag="div" class="space-y-4">
                     <article
                         v-for="post in posts"
                         :key="post.id"
-                        class="sp-glass-card p-5 group"
+                        class="sp-glass-card sp-post-card p-5 group"
                     >
                         <!-- User info row -->
                         <div class="flex items-center justify-between mb-4">
@@ -515,7 +523,7 @@ const deletePost = (postId) => {
                                 <Transition name="dropdown">
                                     <div
                                         v-if="openMenuPostId === post.id"
-                                        class="absolute right-0 top-9 z-20 w-36 rounded-xl overflow-hidden shadow-2xl"
+                                        class="absolute right-0 top-9 z-20 w-36 rounded-2xl overflow-hidden shadow-2xl"
                                         style="background: var(--sp-card); border: 1px solid var(--sp-border);"
                                     >
                                         <button
@@ -523,7 +531,7 @@ const deletePost = (postId) => {
                                             class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-left transition-colors hover:bg-[#32cd32]/10 hover:text-[#32cd32]"
                                             style="color: var(--sp-text);"
                                         >
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125"/>
                                             </svg>
                                             Edit
@@ -533,7 +541,7 @@ const deletePost = (postId) => {
                                             class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-left transition-colors hover:bg-red-500/10 hover:text-red-400"
                                             style="color: var(--sp-text-3);"
                                         >
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
                                             </svg>
                                             Delete
@@ -567,16 +575,16 @@ const deletePost = (postId) => {
                         >
                             {{ post.content }}
                         </p>
-                        <img
+                        <div
                             v-if="post.image_path"
-                            :src="
-                                post.image_path
-                                    ? `/storage/${post.image_path}`
-                                    : ''
-                            "
-                            alt="Post image"
-                            class="w-full rounded-2xl object-cover mb-4"
-                        />
+                            class="w-full rounded-xl overflow-hidden mb-4 sp-post-image-wrap"
+                        >
+                            <img
+                                :src="`/storage/${post.image_path}`"
+                                alt="Post image"
+                                class="w-full object-cover sp-post-image"
+                            />
+                        </div>
 
                         <!-- Actions row -->
                         <div
@@ -589,7 +597,7 @@ const deletePost = (postId) => {
                                 @click="toggleLike(post)"
                                 :disabled="likingPostId === post.id"
                                 class="flex items-center gap-1.5 text-xs font-medium transition-all duration-200 hover:scale-105"
-                                :class="post.isLiked ? 'text-red-400' : ''"
+                                :class="post.isLiked ? 'text-red-400 sp-like-pop' : ''"
                                 :style="
                                     !post.isLiked
                                         ? { color: 'var(--sp-text-3)' }
@@ -709,7 +717,7 @@ const deletePost = (postId) => {
                             </form>
                         </div>
                     </article>
-                </div>
+                </TransitionGroup>
             </div>
             <!-- end LEFT -->
 
@@ -717,7 +725,7 @@ const deletePost = (postId) => {
             <aside class="hidden lg:block">
                 <div class="sticky top-24 space-y-5">
                     <!-- Who to follow -->
-                    <div class="sp-glass-card p-5">
+                    <div class="sp-glass-card sp-side-card p-5">
                         <div class="flex items-center gap-2 mb-4">
                             <span
                                 class="w-1 h-4 rounded-full bg-[#32cd32]"
@@ -747,7 +755,7 @@ const deletePost = (postId) => {
                             <li
                                 v-for="user in suggestedUsers"
                                 :key="user.id"
-                                class="flex items-center gap-3"
+                                class="flex items-center gap-3 sp-suggest-row"
                             >
                                 <!-- Avatar -->
                                 <div class="w-9 h-9 sp-avatar">
@@ -775,20 +783,25 @@ const deletePost = (postId) => {
                                     :id="`follow-btn-${user.id}`"
                                     @click="followUser(user)"
                                     :disabled="followingUserId === user.id"
-                                    class="sp-btn-outline flex-shrink-0 text-[11px]"
+                                    class="sp-btn-outline flex-shrink-0 text-[11px] inline-flex items-center gap-1.5"
                                 >
-                                    {{
-                                        followingUserId === user.id
-                                            ? "…"
-                                            : "Follow"
-                                    }}
+                                    <svg
+                                        v-if="followingUserId === user.id"
+                                        class="w-3 h-3 sp-spin"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="40 20" opacity="0.85"/>
+                                    </svg>
+                                    <span>{{ followingUserId === user.id ? "Following" : "Follow" }}</span>
                                 </button>
                             </li>
                         </ul>
                     </div>
 
                     <!-- Quick stats card -->
-                    <div class="sp-glass-card p-5">
+                    <div class="sp-glass-card sp-side-card p-5">
                         <div class="flex items-center gap-2 mb-4">
                             <span
                                 class="w-1 h-4 rounded-full bg-[#32cd32]"
@@ -802,7 +815,7 @@ const deletePost = (postId) => {
                         </div>
                         <div class="grid grid-cols-2 gap-3">
                             <div
-                                class="rounded-xl p-3 text-center"
+                                class="rounded-lg p-3 text-center sp-stat-tile"
                                 style="
                                     background-color: var(--sp-bg-2);
                                     border: 1px solid var(--sp-border);
@@ -819,7 +832,7 @@ const deletePost = (postId) => {
                                 </div>
                             </div>
                             <div
-                                class="rounded-xl p-3 text-center"
+                                class="rounded-lg p-3 text-center sp-stat-tile"
                                 style="
                                     background-color: var(--sp-bg-2);
                                     border: 1px solid var(--sp-border);
@@ -856,11 +869,11 @@ const deletePost = (postId) => {
                 @click.self="cancelDelete"
             >
                 <div
-                    class="w-full max-w-sm rounded-2xl p-6 shadow-2xl animate-rise-in"
+                    class="w-full max-w-sm rounded-2xl p-6 shadow-2xl sp-modal-pop"
                     style="background: var(--sp-card); border: 1px solid var(--sp-border);"
                 >
-                    <div class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" style="background: rgba(239,68,68,0.15);">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 sp-shake-icon" style="background: rgba(239,68,68,0.15);">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
                         </svg>
                     </div>
@@ -913,5 +926,163 @@ const deletePost = (postId) => {
 .modal-fade-enter-from,
 .modal-fade-leave-to {
     opacity: 0;
+}
+
+/* ── Header scroll shadow ─────────────────────────────── */
+.sp-header {
+    transition: box-shadow 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease;
+    border-bottom: 1px solid transparent;
+}
+.sp-header--scrolled {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    border-bottom-color: var(--sp-border);
+}
+
+/* ── Composer polish ──────────────────────────────────── */
+.sp-composer {
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.sp-composer:focus-within {
+    border-color: rgba(50, 205, 50, 0.4);
+    box-shadow: 0 0 0 3px rgba(50, 205, 50, 0.1), 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+.sp-accent-shimmer {
+    position: relative;
+    overflow: hidden;
+    background-size: 200% 100%;
+    animation: sp-shimmer-slide 5s linear infinite;
+}
+@keyframes sp-shimmer-slide {
+    0% { background-position: 0% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ── Feed list stagger transitions ────────────────────── */
+.feed-move,
+.feed-enter-active,
+.feed-leave-active {
+    transition: all 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.feed-enter-from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+}
+.feed-leave-to {
+    opacity: 0;
+    transform: translateX(24px) scale(0.97);
+}
+.feed-leave-active {
+    position: absolute;
+    width: 100%;
+}
+
+/* ── Post card hover lift ─────────────────────────────── */
+.sp-post-card {
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.sp-post-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.16);
+    border-color: rgba(50, 205, 50, 0.25);
+}
+
+/* ── Post image zoom ───────────────────────────────────── */
+.sp-post-image-wrap {
+    position: relative;
+}
+.sp-post-image {
+    max-height: 28rem;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.sp-post-image-wrap:hover .sp-post-image {
+    transform: scale(1.04);
+}
+
+/* ── Like pop ──────────────────────────────────────────── */
+@keyframes sp-like-pop {
+    0%   { transform: scale(1); }
+    35%  { transform: scale(1.35); }
+    60%  { transform: scale(0.92); }
+    100% { transform: scale(1); }
+}
+.sp-like-pop svg {
+    animation: sp-like-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── Empty state breathing icon ────────────────────────── */
+@keyframes sp-breathe {
+    0%, 100% { transform: scale(1); opacity: 0.85; }
+    50%      { transform: scale(1.08); opacity: 1; }
+}
+.sp-empty-icon {
+    animation: sp-breathe 2.6s ease-in-out infinite;
+}
+
+/* ── Sidebar hover polish ──────────────────────────────── */
+.sp-side-card {
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.sp-side-card:hover {
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+    border-color: rgba(50, 205, 50, 0.2);
+}
+.sp-suggest-row {
+    padding: 6px;
+    margin: -6px;
+    border-radius: 12px;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+.sp-suggest-row:hover {
+    background-color: rgba(50, 205, 50, 0.06);
+    transform: translateX(2px);
+}
+.sp-stat-tile {
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.sp-stat-tile:hover {
+    transform: translateY(-2px);
+    border-color: rgba(50, 205, 50, 0.35) !important;
+}
+
+/* ── Follow button spinner ─────────────────────────────── */
+.sp-spin {
+    animation: sp-rotate 0.8s linear infinite;
+}
+@keyframes sp-rotate {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+/* ── Modal entrance ────────────────────────────────────── */
+@keyframes sp-modal-pop {
+    0%   { opacity: 0; transform: translateY(12px) scale(0.94); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.sp-modal-pop {
+    animation: sp-modal-pop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes sp-shake {
+    0%, 100% { transform: rotate(0deg); }
+    25%      { transform: rotate(-8deg); }
+    75%      { transform: rotate(8deg); }
+}
+.sp-shake-icon {
+    animation: sp-shake 0.5s ease-in-out 0.15s 1;
+}
+
+/* ── Reduced motion ────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    .animate-pulse-glow,
+    .sp-accent-shimmer,
+    .sp-empty-icon,
+    .sp-spin,
+    .sp-shake-icon,
+    .sp-like-pop svg,
+    .sp-modal-pop,
+    .feed-enter-active,
+    .feed-leave-active {
+        animation: none !important;
+        transition: none !important;
+    }
 }
 </style>
