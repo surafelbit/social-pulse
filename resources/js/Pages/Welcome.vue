@@ -182,21 +182,68 @@
         </div>
       </section>
 
-      <!-- Features: asymmetric bento -->
+      <!-- Features: unified layout -->
       <section class="px-margin-mobile md:px-margin-desktop py-stack-xl max-w-container-max mx-auto" id="features">
-        <div class="sp-section-header reveal">
-          <p class="sp-section-eyebrow text-label-sm uppercase tracking-widest mb-4">Capabilities</p>
-          <h2 class="font-headline-lg text-headline-lg mb-4 text-on-surface">Redefining social interaction</h2>
-          <p class="text-body-md text-on-surface-variant max-w-xl">Three pillars that make Pulse feel alive — not another feed.</p>
-          <div class="sp-underline-grow mt-6"></div>
-        </div>
+        <div class="sp-features-layout reveal">
+          <div class="sp-section-header sp-area-header">
+            <p class="sp-section-eyebrow text-label-sm uppercase tracking-widest mb-4">Capabilities</p>
+            <h2 class="font-headline-lg text-headline-lg mb-4 text-on-surface">Redefining social interaction</h2>
+            <p class="text-body-md text-on-surface-variant">Three pillars that make Pulse feel alive — not another feed.</p>
+            <div class="sp-underline-grow mt-6"></div>
+          </div>
 
-        <div class="sp-bento-grid">
+          <div class="sp-flow-panel glass-card sp-area-flow">
+            <p class="sp-flow-eyebrow text-label-sm uppercase tracking-widest">How it works</p>
+            <ol class="sp-flow-steps">
+              <li v-for="(step, i) in pulseSteps" :key="i" class="sp-flow-step">
+                <div class="sp-flow-step-marker" aria-hidden="true">
+                  <span class="sp-flow-step-num">{{ i + 1 }}</span>
+                  <span v-if="i < pulseSteps.length - 1" class="sp-flow-step-line"></span>
+                </div>
+                <div class="sp-flow-step-body">
+                  <div class="sp-flow-step-icon">
+                    <span class="material-symbols-outlined sp-accent-icon">{{ step.icon }}</span>
+                  </div>
+                  <div>
+                    <h3 class="sp-flow-step-title">{{ step.title }}</h3>
+                    <p class="sp-flow-step-desc">{{ step.desc }}</p>
+                  </div>
+                </div>
+              </li>
+            </ol>
+            <blockquote class="sp-flow-quote">
+              <p>"It feels like the internet used to — alive, human, and actually in the moment."</p>
+              <footer><cite>— Yuki M., community lead in Osaka</cite></footer>
+            </blockquote>
+          </div>
+
+          <!-- Trending communities — fills the row below the header -->
+          <div class="sp-trending-strip sp-area-trending">
+            <div class="sp-trending-head">
+              <span class="sp-live-dot sp-live-dot--sm" aria-hidden="true"></span>
+              <span class="sp-trending-label">Trending communities</span>
+            </div>
+            <div class="sp-trending-chips">
+              <a
+                v-for="c in trendingCommunities"
+                :key="c.name"
+                href="#"
+                class="sp-trending-chip glass-card"
+              >
+                <span class="material-symbols-outlined sp-trending-chip-icon" aria-hidden="true">{{ c.icon }}</span>
+                <span class="sp-trending-chip-name">{{ c.name }}</span>
+                <span class="sp-trending-chip-count">{{ c.members }}</span>
+              </a>
+            </div>
+          </div>
+
           <article
             v-for="(f, i) in features"
             :key="i"
             class="glass-card animated-card sp-bento-card group sp-tilt"
-            :class="{ 'sp-bento-card--featured': i === 0 }"
+            :class="[
+              i === 0 ? 'sp-bento-card--featured sp-area-featured' : `sp-area-side-${i}`,
+            ]"
             @mousemove="tilt"
             @mouseleave="resetTilt"
           >
@@ -344,6 +391,21 @@ const stats = [
   { value: '99.9%', label: 'Uptime' },
 ];
 
+const pulseSteps = [
+  { icon: 'edit_note', title: 'Share a moment', desc: 'Post a pulse, story, or go live — no algorithm in the way.' },
+  { icon: 'hub', title: 'Find your people', desc: 'Join communities built around what you actually care about.' },
+  { icon: 'monitoring', title: 'Feel the beat', desc: 'Watch the global pulse unfold in real time, city by city.' },
+];
+
+const trendingCommunities = [
+  { icon: 'code', name: 'Indie Makers', members: '24K' },
+  { icon: 'palette', name: 'Design Systems', members: '18K' },
+  { icon: 'music_note', name: 'Late Night Beats', members: '31K' },
+  { icon: 'eco', name: 'Urban Gardeners', members: '9K' },
+  { icon: 'sports_esports', name: 'Retro Gamers', members: '42K' },
+  { icon: 'flight', name: 'Digital Nomads', members: '15K' },
+];
+
 const features = [
   {
     icon: 'bolt',
@@ -440,8 +502,8 @@ onMounted(() => {
     });
   }, { threshold: 0.12 });
 
-  document.querySelectorAll('.animated-card').forEach(card => {
-    card.classList.add('transition-all', 'duration-700', 'opacity-0', 'translate-y-8');
+  document.querySelectorAll('.animated-card').forEach((card, i) => {
+    card.style.setProperty('--reveal-delay', `${i * 0.1}s`);
     observer.observe(card);
   });
 
@@ -841,6 +903,20 @@ onUnmounted(() => {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* Animated bento cards — were stuck invisible (opacity-0 with no reveal rule) */
+.animated-card {
+  opacity: 0;
+  transform: translateY(1.5rem);
+  transition:
+    opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+  transition-delay: var(--reveal-delay, 0s);
+}
+.animated-card.sp-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
 .reveal-delay-1 { transition-delay: 0.08s; }
 .reveal-delay-2 { transition-delay: 0.16s; }
 .reveal-delay-3 { transition-delay: 0.24s; }
@@ -899,9 +975,196 @@ onUnmounted(() => {
   line-height: 1.4;
 }
 
-/* ── Features bento ── */
-.sp-section-header { margin-bottom: 3rem; max-width: 36rem; }
+/* ── Features: unified layout ── */
+.sp-features-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+@media (min-width: 1024px) {
+  .sp-features-layout {
+    grid-template-columns: 1.15fr 0.85fr;
+    grid-template-areas:
+      "header  flow"
+      "trending trending"
+      "featured side1"
+      "featured side2";
+    gap: 1.5rem;
+  }
+  .sp-area-header   { grid-area: header; }
+  .sp-area-flow     { grid-area: flow; }
+  .sp-area-trending { grid-area: trending; }
+  .sp-area-featured { grid-area: featured; }
+  .sp-area-side-1   { grid-area: side1; }
+  .sp-area-side-2   { grid-area: side2; }
+}
+
+.sp-section-header { max-width: 36rem; }
 .sp-section-eyebrow { color: var(--sp-primary); font-weight: 600; }
+
+/* Trending communities strip */
+.sp-trending-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.sp-trending-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.sp-trending-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sp-text-2);
+}
+.sp-trending-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.sp-trending-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--sp-text);
+  text-decoration: none;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease;
+}
+.sp-trending-chip:hover {
+  transform: translateY(-2px);
+}
+.sp-trending-chip-icon {
+  font-size: 1rem;
+  color: var(--sp-primary);
+}
+.sp-trending-chip-count {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--sp-text-3);
+  padding: 2px 6px;
+  border-radius: 9999px;
+  background: var(--sp-primary-soft);
+}
+
+.sp-flow-panel {
+  padding: 1.5rem;
+  border-radius: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+@media (min-width: 1024px) {
+  .sp-flow-panel { padding: 1.75rem 2rem; }
+}
+.sp-flow-eyebrow {
+  color: var(--sp-text-3);
+  font-weight: 600;
+  margin: 0;
+}
+.sp-flow-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.sp-flow-step {
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  gap: 0.75rem;
+  position: relative;
+}
+.sp-flow-step-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 0.25rem;
+}
+.sp-flow-step-num {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--sp-on-primary);
+  background: var(--sp-primary);
+  flex-shrink: 0;
+}
+.sp-flow-step-line {
+  width: 2px;
+  flex: 1;
+  min-height: 1.5rem;
+  margin: 4px 0;
+  background: linear-gradient(180deg, var(--sp-primary) 0%, var(--sp-border) 100%);
+  border-radius: 9999px;
+}
+.sp-flow-step-body {
+  display: flex;
+  gap: 0.75rem;
+  padding-bottom: 1.25rem;
+}
+.sp-flow-step:last-child .sp-flow-step-body {
+  padding-bottom: 0;
+}
+.sp-flow-step-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--sp-primary-soft);
+  flex-shrink: 0;
+}
+.sp-flow-step-icon .material-symbols-outlined {
+  font-size: 1.125rem;
+}
+.sp-flow-step-title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--sp-text);
+  line-height: 1.3;
+  margin: 0 0 2px;
+}
+.sp-flow-step-desc {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--sp-text-2);
+  margin: 0;
+}
+.sp-flow-quote {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+  border-left: 3px solid var(--sp-primary);
+  background: var(--sp-primary-soft);
+}
+.sp-flow-quote p {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--sp-text);
+}
+.sp-flow-quote cite {
+  font-size: 0.75rem;
+  font-style: normal;
+  color: var(--sp-text-2);
+  font-weight: 600;
+}
+
+/* ── Features bento cards ── */
 .sp-underline-grow {
   height: 3px;
   width: 4rem;
@@ -913,20 +1176,6 @@ onUnmounted(() => {
 }
 .reveal.sp-revealed .sp-underline-grow { transform: scaleX(1); }
 
-.sp-bento-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-}
-@media (min-width: 768px) {
-  .sp-bento-grid {
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: auto auto;
-  }
-  .sp-bento-card--featured {
-    grid-row: span 2;
-  }
-}
 .sp-bento-card {
   padding: 1.5rem;
   border-radius: 1.5rem;
@@ -934,8 +1183,18 @@ onUnmounted(() => {
   flex-direction: column;
   gap: 1.5rem;
 }
+@media (min-width: 1024px) {
+  .sp-bento-card--featured .sp-feature-photo {
+    height: 100%;
+    min-height: 200px;
+    flex: 1;
+  }
+  .sp-bento-card--featured {
+    min-height: 0;
+  }
+}
 .sp-bento-card--featured .sp-feature-photo {
-  height: 220px;
+  height: 200px;
 }
 .sp-bento-body { flex: 1; }
 .sp-bento-footer {
