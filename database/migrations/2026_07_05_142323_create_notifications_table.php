@@ -9,13 +9,14 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+   public function up(): void
 {
     Schema::create('notifications', function (Blueprint $table) {
         $table->id();
-        $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Who gets the notification
-        $table->string('type'); // e.g., 'like', 'follow'
-        $table->unsignedBigInteger('notifiable_id'); // ID of the post or user that caused the event
+        $table->foreignId('user_id')->constrained()->cascadeOnDelete(); // The receiver
+        $table->foreignId('sender_id')->constrained('users')->cascadeOnDelete(); // The person who clicked like/follow
+        $table->string('type'); // 'like' or 'follow'
+        $table->unsignedBigInteger('reference_id')->nullable(); // ID of the post
         $table->boolean('is_read')->default(false);
         $table->timestamps();
     });

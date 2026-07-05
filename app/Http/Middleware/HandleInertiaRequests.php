@@ -27,13 +27,17 @@ class HandleInertiaRequests extends Middleware
      *
      * @return array<string, mixed>
      */
-    public function share(Request $request): array
-    {
-        return [
-            ...parent::share($request),
-            'auth' => [
-                'user' => $request->user(),
-            ],
-        ];
-    }
+   public function share(Request $request): array
+{
+    return [
+        ...parent::share($request),
+        'auth' => [
+            'user' => $request->user(),
+            // Count unread notifications for the logged-in user
+            'unreadNotifications' => $request->user() 
+                ? $request->user()->notifications()->where('is_read', false)->count() 
+                : 0,
+        ],
+    ];
+}
 }
