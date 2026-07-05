@@ -120,8 +120,22 @@
           </button>
         </div>
 
+        <!-- Hero photo collage -->
+        <div class="sp-hero-collage reveal reveal-delay-3" aria-hidden="false">
+          <div class="sp-collage-card sp-collage-card--main">
+            <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=900&q=80" alt="Friends sharing a moment together outdoors" loading="lazy" />
+          </div>
+          <div class="sp-collage-card sp-collage-card--sub">
+            <img src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=700&q=80" alt="A group of friends laughing together" loading="lazy" />
+          </div>
+          <div class="sp-collage-badge">
+            <span class="sp-live-dot"></span>
+            <span>1.2K pulses today</span>
+          </div>
+        </div>
+
         <!-- Social Proof / Avatars (inline SVG, no external images) -->
-        <div class="mt-16 flex flex-col items-center gap-4 reveal reveal-delay-4">
+        <div class="mt-10 flex flex-col items-center gap-4 reveal reveal-delay-4">
           <div class="flex -space-x-3">
             <svg v-for="(a, i) in avatars" :key="i" class="w-12 h-12 rounded-full border-2 sp-avatar" style="border-color: var(--sp-bg);" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
               <defs>
@@ -167,7 +181,13 @@
             @mousemove="tilt"
             @mouseleave="resetTilt"
           >
-            <div class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors sp-icon-pop">
+            <div v-if="f.image" class="sp-feature-photo">
+              <img :src="f.image" :alt="f.title" loading="lazy" />
+              <span class="sp-feature-photo-icon">
+                <span class="material-symbols-outlined text-primary text-2xl">{{ f.icon }}</span>
+              </span>
+            </div>
+            <div v-else class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors sp-icon-pop">
               <span class="material-symbols-outlined text-primary text-4xl">{{ f.icon }}</span>
             </div>
             <div>
@@ -184,7 +204,11 @@
       <!-- CTA Section -->
       <section class="relative px-margin-mobile md:px-margin-desktop py-stack-xl max-w-container-max mx-auto">
         <div class="relative glass-card rounded-[40px] overflow-hidden p-stack-xl md:p-24 text-center reveal">
-          <!-- Inline SVG ambient pattern instead of external photo -->
+          <!-- Real photo background, duotone-treated to match the brand -->
+          <div class="absolute inset-0 z-0 sp-cta-photo">
+            <img src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=1600&q=80" alt="A crowd connected together at night" loading="lazy" />
+          </div>
+          <!-- Inline SVG ambient pattern layered above the photo -->
           <svg class="absolute inset-0 z-0 w-full h-full sp-cta-pattern" preserveAspectRatio="xMidYMid slice" viewBox="0 0 800 400" aria-hidden="true">
             <defs>
               <radialGradient id="sp-cta-glow" cx="50%" cy="0%" r="80%">
@@ -294,12 +318,14 @@ const features = [
     title: 'Real-time Pulse',
     desc: 'Experience content as it happens. Our proprietary live engine delivers zero-latency updates for a truly immediate social experience.',
     cta: 'Learn more',
+    image: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=700&q=80',
   },
   {
     icon: 'groups',
     title: 'Deep Connections',
     desc: 'Find your tribe in specialized community groups. We focus on quality interactions over quantity, fostering meaningful long-term bonds.',
     cta: 'Browse groups',
+    image: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=700&q=80',
   },
   {
     icon: 'verified_user',
@@ -694,10 +720,146 @@ onUnmounted(() => {
   100% { opacity: 0; transform: scale(1.25); }
 }
 
+/* Real photo behind the CTA, duotone-treated to sit inside the green/black palette */
+.sp-cta-photo {
+  overflow: hidden;
+}
+.sp-cta-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(0.55) brightness(0.55) saturate(1.3) sepia(0.15) hue-rotate(60deg);
+  transform: scale(1.05);
+}
+.sp-cta-photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(6,10,7,0.55) 0%, rgba(6,10,7,0.85) 100%);
+}
+
+/* Hero photo collage */
+.sp-hero-collage {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  height: 220px;
+  margin: 0.5rem auto 0;
+}
+.sp-collage-card {
+  position: absolute;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 3px solid var(--sp-bg);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.sp-collage-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: saturate(1.05) contrast(1.02);
+}
+.sp-collage-card--main {
+  width: 300px;
+  height: 190px;
+  left: 50%;
+  top: 0;
+  transform: translateX(-62%) rotate(-3deg);
+  z-index: 2;
+}
+.sp-collage-card--sub {
+  width: 190px;
+  height: 130px;
+  left: 50%;
+  top: 55px;
+  transform: translateX(18%) rotate(4deg);
+  z-index: 1;
+}
+.sp-hero-collage:hover .sp-collage-card--main {
+  transform: translateX(-64%) rotate(-5deg) translateY(-4px);
+}
+.sp-hero-collage:hover .sp-collage-card--sub {
+  transform: translateX(20%) rotate(6deg) translateY(-4px);
+}
+.sp-collage-badge {
+  position: absolute;
+  left: 50%;
+  bottom: -14px;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--sp-text);
+  background-color: var(--sp-card);
+  border: 1px solid var(--sp-border);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  z-index: 3;
+  white-space: nowrap;
+}
+
+/* Feature card photos */
+.sp-feature-photo {
+  position: relative;
+  width: 100%;
+  height: 160px;
+  border-radius: 18px;
+  overflow: hidden;
+}
+.sp-feature-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(0.2) saturate(1.1);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), filter 0.4s ease;
+}
+.sp-feature-photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, rgba(50,205,50,0.28) 0%, rgba(6,10,7,0.35) 65%);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+.group:hover .sp-feature-photo img {
+  transform: scale(1.08);
+  filter: grayscale(0) saturate(1.2);
+}
+.sp-feature-photo-icon {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--sp-card);
+  border: 1px solid var(--sp-border);
+  backdrop-filter: blur(10px);
+  z-index: 2;
+}
+
 /* Text color overrides using CSS vars */
 .text-on-surface         { color: var(--sp-text); }
 .text-on-surface-variant { color: var(--sp-text-2); }
 .bg-surface-container-lowest { background-color: var(--sp-bg); }
+
+@media (max-width: 480px) {
+  .sp-hero-collage {
+    max-width: 320px;
+    height: 170px;
+  }
+  .sp-collage-card--main { width: 200px; height: 140px; }
+  .sp-collage-card--sub { width: 130px; height: 95px; top: 40px; }
+}
 
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
