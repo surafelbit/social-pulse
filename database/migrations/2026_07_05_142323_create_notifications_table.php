@@ -10,12 +10,16 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
-        Schema::create('notifications', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
-    }
+{
+    Schema::create('notifications', function (Blueprint $table) {
+        $table->id();
+        $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Who gets the notification
+        $table->string('type'); // e.g., 'like', 'follow'
+        $table->unsignedBigInteger('notifiable_id'); // ID of the post or user that caused the event
+        $table->boolean('is_read')->default(false);
+        $table->timestamps();
+    });
+}
 
     /**
      * Reverse the migrations.
