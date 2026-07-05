@@ -25,6 +25,38 @@ const showPassword = ref(false);
 const emailFocused = ref(false);
 const passwordFocused = ref(false);
 
+// Theme (kept consistent with the rest of the app so colors always match)
+const isDark = ref(
+    typeof window !== 'undefined'
+        ? document.documentElement.classList.contains('dark')
+        : false,
+);
+
+const toggleTheme = () => {
+    isDark.value = !isDark.value;
+    if (isDark.value) {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('sp-theme', 'dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('sp-theme', 'light');
+    }
+};
+
+if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('sp-theme');
+    if (saved === 'dark') {
+        document.documentElement.classList.add('dark');
+        isDark.value = true;
+    } else if (saved === 'light') {
+        document.documentElement.classList.remove('dark');
+        isDark.value = false;
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+        isDark.value = true;
+    }
+}
+
 const submit = () => {
     form.post(route('login'), {
         onFinish: () => form.reset('password'),
@@ -36,19 +68,35 @@ const submit = () => {
     <Head title="Login | Social Pulse" />
 
     <!-- Full Page Wrapper -->
-    <div class="font-body-md text-on-background min-h-screen flex flex-col" style="background-color: var(--sp-bg); color: var(--sp-text);">
+    <div class="font-body-md min-h-screen flex flex-col transition-colors duration-300" style="background-color: var(--sp-bg); color: var(--sp-text);">
 
         <!-- TopNavBar -->
-        <nav class="bg-surface/80 backdrop-blur-md w-full top-0 sticky border-b border-outline-variant z-50">
+        <nav class="w-full top-0 sticky z-50 sp-login-nav" style="border-bottom: 1px solid var(--sp-border); background-color: color-mix(in srgb, var(--sp-bg) 82%, transparent); backdrop-filter: blur(16px);">
             <div class="flex justify-between items-center h-16 px-margin-desktop max-w-container-max mx-auto">
-                <div class="flex items-center gap-2.5 group cursor-default">
-                    <span class="w-2.5 h-2.5 rounded-full bg-primary-container shadow-[0_0_16px_rgba(50,205,50,0.7)] transition-transform duration-300 group-hover:scale-125"></span>
-                    <span class="font-headline-md text-headline-md font-bold text-primary tracking-tight">
-                        Social Pulse
+                <Link href="/" class="flex items-center gap-2.5 group cursor-pointer">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#32cd32] shadow-[0_0_16px_rgba(50,205,50,0.7)] transition-transform duration-300 group-hover:scale-125 sp-login-pulse"></span>
+                    <span class="font-headline-md text-headline-md font-bold tracking-tight" style="color: var(--sp-text);">
+                        Social<span class="sp-login-gradient-text">Pulse</span>
                     </span>
-                </div>
+                </Link>
                 <div class="hidden md:flex items-center gap-gutter">
-                    <button class="font-label-sm text-label-sm text-secondary hover:text-on-surface transition-all duration-300 relative after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-px after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full">
+                    <button
+                        @click="toggleTheme"
+                        class="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 hover:bg-[#32cd32]/10 hover:text-[#32cd32] mr-2"
+                        style="color: var(--sp-text-2); border: 1px solid var(--sp-border);"
+                        :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+                    >
+                        <svg v-if="isDark" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"/>
+                        </svg>
+                        <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"/>
+                        </svg>
+                    </button>
+                    <button
+                        class="font-label-sm text-label-sm transition-all duration-300 relative sp-login-navlink"
+                        style="color: var(--sp-text-2);"
+                    >
                         Help Center
                     </button>
                 </div>
@@ -58,23 +106,29 @@ const submit = () => {
         <!-- Main Content: Login Canvas -->
         <main class="flex-grow flex items-center justify-center px-margin-mobile py-12 relative overflow-hidden">
             <!-- Kinetic Background Elements -->
-            <div class="absolute top-1/4 -left-20 w-96 h-96 bg-primary-container opacity-[0.08] rounded-full blur-3xl animate-float-slow"></div>
-            <div class="absolute bottom-1/4 -right-20 w-80 h-80 bg-tertiary-container opacity-[0.07] rounded-full blur-3xl animate-float-slower"></div>
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] h-[520px] rounded-full bg-primary-container opacity-[0.05] blur-3xl pointer-events-none"></div>
+            <div class="absolute top-1/4 -left-20 w-96 h-96 rounded-full blur-3xl animate-float-slow" style="background-color: rgba(50,205,50,0.08);"></div>
+            <div class="absolute bottom-1/4 -right-20 w-80 h-80 rounded-full blur-3xl animate-float-slower" style="background-color: rgba(76,227,70,0.07);"></div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] h-[520px] rounded-full blur-3xl pointer-events-none" style="background-color: rgba(50,205,50,0.05);"></div>
 
-            <div class="w-full max-w-md bg-surface-container-lowest border border-outline-variant rounded-2xl p-base md:p-10 kinetic-shadow transition-all duration-500 relative z-10 overflow-hidden animate-rise-in">
+            <div
+                class="w-full max-w-md rounded-2xl p-base md:p-10 kinetic-shadow transition-all duration-500 relative z-10 overflow-hidden animate-rise-in sp-login-card"
+                style="background-color: var(--sp-card); border: 1px solid var(--sp-border); color: var(--sp-text); backdrop-filter: blur(20px);"
+            >
 
                 <!-- Signature accent bar -->
                 <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#32cd32] via-[#4ce346] to-[#32cd32] bg-[length:200%_100%] animate-shimmer"></div>
 
                 <!-- Headline -->
                 <header class="mb-10 border-l-4 border-[#32cd32] pl-4">
-                    <h1 class="font-headline-lg text-headline-lg mb-2 text-on-surface">Welcome back to the Beat</h1>
-                    <p class="font-body-md text-secondary">Sign in to sync your rhythm with the world.</p>
+                    <h1 class="font-headline-lg text-headline-lg mb-2" style="color: var(--sp-text);">Welcome back to the Beat</h1>
+                    <p class="font-body-md" style="color: var(--sp-text-2);">Sign in to sync your rhythm with the world.</p>
                 </header>
 
                 <!-- Status Message -->
-                <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
+                <div v-if="status" class="mb-4 text-sm font-semibold flex items-center gap-2 sp-login-status" style="color: #32cd32;">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
                     {{ status }}
                 </div>
 
@@ -83,11 +137,11 @@ const submit = () => {
 
                     <!-- Email Field -->
                     <div class="space-y-2">
-                        <label class="font-label-sm text-label-sm text-on-surface block" for="email">EMAIL ADDRESS</label>
+                        <label class="font-label-sm text-label-sm block" style="color: var(--sp-text);" for="email">EMAIL ADDRESS</label>
                         <div class="relative">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none transition-colors duration-300"
-                                :class="emailFocused ? 'text-[#32cd32]' : 'text-secondary'" stroke="currentColor">
+                                :style="{ color: emailFocused ? '#32cd32' : 'var(--sp-text-3)' }" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
                             </svg>
                             <input
@@ -99,7 +153,8 @@ const submit = () => {
                                 autocomplete="username"
                                 @focus="emailFocused = true"
                                 @blur="emailFocused = false"
-                                class="w-full h-12 pl-11 pr-4 bg-surface-container-lowest border border-outline-variant text-body-md focus-ring rounded-lg transition-all duration-300 hover:border-[#4ce346]"
+                                class="w-full h-12 pl-11 pr-4 text-body-md rounded-lg transition-all duration-300 sp-login-input"
+                                style="background-color: var(--sp-bg-2); color: var(--sp-text); border: 1px solid var(--sp-border);"
                                 placeholder="name@company.com"
                             />
                         </div>
@@ -109,11 +164,12 @@ const submit = () => {
                     <!-- Password Field -->
                     <div class="space-y-2">
                         <div class="flex justify-between items-center">
-                            <label class="font-label-sm text-label-sm text-on-surface block" for="password">PASSWORD</label>
+                            <label class="font-label-sm text-label-sm block" style="color: var(--sp-text);" for="password">PASSWORD</label>
                             <Link
                                 v-if="canResetPassword"
                                 :href="route('password.request')"
-                                class="font-label-sm text-label-sm text-primary hover:underline transition-all"
+                                class="font-label-sm text-label-sm hover:underline transition-all"
+                                style="color: #32cd32;"
                             >
                                 Forgot Password?
                             </Link>
@@ -121,7 +177,7 @@ const submit = () => {
                         <div class="relative">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none transition-colors duration-300"
-                                :class="passwordFocused ? 'text-[#32cd32]' : 'text-secondary'" stroke="currentColor">
+                                :style="{ color: passwordFocused ? '#32cd32' : 'var(--sp-text-3)' }" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
                             </svg>
                             <input
@@ -132,13 +188,15 @@ const submit = () => {
                                 autocomplete="current-password"
                                 @focus="passwordFocused = true"
                                 @blur="passwordFocused = false"
-                                class="w-full h-12 pl-11 pr-11 bg-surface-container-lowest border border-outline-variant text-body-md focus-ring rounded-lg transition-all duration-300 hover:border-[#4ce346]"
+                                class="w-full h-12 pl-11 pr-11 text-body-md rounded-lg transition-all duration-300 sp-login-input"
+                                style="background-color: var(--sp-bg-2); color: var(--sp-text); border: 1px solid var(--sp-border);"
                                 placeholder="••••••••"
                             />
                             <button
                                 type="button"
                                 @click.prevent="showPassword = !showPassword"
-                                class="absolute right-3 top-1/2 -translate-y-1/2 text-secondary hover:text-on-surface focus:outline-none transition-colors duration-300"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 hover:text-[#32cd32] focus:outline-none transition-colors duration-300"
+                                style="color: var(--sp-text-3);"
                             >
                                 <!-- Eye Open Icon (when password is hidden) -->
                                 <svg v-if="!showPassword" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -161,9 +219,10 @@ const submit = () => {
                             id="remember"
                             type="checkbox"
                             v-model="form.remember"
-                            class="rounded border-outline-variant text-primary shadow-sm focus:ring-[#32cd32] cursor-pointer"
+                            class="rounded cursor-pointer sp-login-checkbox"
+                            style="border: 1px solid var(--sp-border); accent-color: #32cd32;"
                         >
-                        <label for="remember" class="ms-2 font-label-sm text-label-sm text-secondary cursor-pointer">
+                        <label for="remember" class="ms-2 font-label-sm text-label-sm cursor-pointer" style="color: var(--sp-text-2);">
                             Remember me
                         </label>
                     </div>
@@ -172,7 +231,7 @@ const submit = () => {
                     <button
                         type="submit"
                         :disabled="form.processing"
-                        class="w-full h-14 bg-primary-container text-on-secondary-fixed font-headline-md text-headline-md flex items-center justify-center gap-2 kinetic-shadow rounded-lg overflow-hidden relative transition-transform duration-200 group"
+                        class="w-full h-14 font-headline-md text-headline-md flex items-center justify-center gap-2 kinetic-shadow rounded-lg overflow-hidden relative transition-transform duration-200 group sp-login-submit"
                         :class="[
                             form.processing ? 'opacity-80 pointer-events-none' : 'active:scale-[0.98]'
                         ]"
@@ -196,14 +255,17 @@ const submit = () => {
 
                 <!-- Divider -->
                 <div class="relative my-8 flex items-center">
-                    <div class="flex-grow h-px bg-gradient-to-r from-transparent to-[#32cd32]/40"></div>
-                    <span class="px-4 font-label-sm text-label-sm text-secondary bg-surface-container-lowest">OR CONTINUE WITH</span>
-                    <div class="flex-grow h-px bg-gradient-to-l from-transparent to-[#32cd32]/40"></div>
+                    <div class="flex-grow h-px" style="background: linear-gradient(to right, transparent, rgba(50,205,50,0.4));"></div>
+                    <span class="px-4 font-label-sm text-label-sm" style="color: var(--sp-text-3); background-color: var(--sp-card);">OR CONTINUE WITH</span>
+                    <div class="flex-grow h-px" style="background: linear-gradient(to left, transparent, rgba(50,205,50,0.4));"></div>
                 </div>
 
                 <!-- Social Logins -->
                 <div class="grid grid-cols-2 gap-4">
-                    <button class="h-12 border border-outline-variant rounded-lg flex items-center justify-center gap-2 font-body-md text-on-surface hover:bg-surface-container hover:border-[#4ce346] hover:-translate-y-0.5 transition-all duration-300">
+                    <button
+                        class="h-12 rounded-lg flex items-center justify-center gap-2 font-body-md hover:-translate-y-0.5 transition-all duration-300 sp-login-social"
+                        style="border: 1px solid var(--sp-border); color: var(--sp-text);"
+                    >
                         <svg class="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path fill="#4285F4" d="M23.52 12.27c0-.79-.07-1.54-.2-2.27H12v4.51h6.47c-.28 1.5-1.13 2.77-2.41 3.62v3.01h3.9c2.28-2.1 3.56-5.2 3.56-8.87z"/>
                             <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.9-3.01c-1.08.72-2.46 1.15-4.03 1.15-3.1 0-5.73-2.09-6.67-4.9H1.3v3.09C3.26 21.3 7.31 24 12 24z"/>
@@ -212,7 +274,10 @@ const submit = () => {
                         </svg>
                         Google
                     </button>
-                    <button class="h-12 border border-outline-variant rounded-lg flex items-center justify-center gap-2 font-body-md text-on-surface hover:bg-surface-container hover:border-[#4ce346] hover:-translate-y-0.5 transition-all duration-300">
+                    <button
+                        class="h-12 rounded-lg flex items-center justify-center gap-2 font-body-md hover:-translate-y-0.5 transition-all duration-300 sp-login-social"
+                        style="border: 1px solid var(--sp-border); color: var(--sp-text);"
+                    >
                         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                             <path d="M17.05 12.536c-.02-2.086 1.703-3.086 1.78-3.135-.97-1.42-2.48-1.615-3.02-1.637-1.285-.13-2.508.756-3.158.756-.65 0-1.653-.738-2.72-.718-1.4.02-2.694.813-3.415 2.066-1.457 2.524-.373 6.263 1.047 8.313.694 1.003 1.523 2.13 2.61 2.09 1.048-.042 1.444-.678 2.712-.678 1.267 0 1.622.678 2.732.657 1.13-.02 1.845-1.024 2.535-2.03.8-1.166 1.128-2.293 1.146-2.352-.025-.011-2.198-.844-2.219-3.332z"/>
                             <path d="M15.045 6.096c.577-.7.966-1.674.86-2.646-.83.034-1.834.553-2.43 1.253-.535.62-1.003 1.61-.876 2.56.928.072 1.87-.472 2.446-1.167z"/>
@@ -222,29 +287,29 @@ const submit = () => {
                 </div>
 
                 <!-- Registration Footer -->
-                <footer class="mt-10 pt-8 border-t border-outline-variant text-center">
-                    <p class="font-body-md text-secondary">
+                <footer class="mt-10 pt-8 text-center" style="border-top: 1px solid var(--sp-border);">
+                    <p class="font-body-md" style="color: var(--sp-text-2);">
                         Don't have an account?
-                        <Link :href="route('register')" class="text-primary font-bold hover:underline">Register</Link>
+                        <Link :href="route('register')" class="font-bold hover:underline" style="color: #32cd32;">Register</Link>
                     </p>
                 </footer>
             </div>
         </main>
 
         <!-- Footer -->
-        <footer class="bg-surface-container-low w-full py-12 border-t border-outline-variant mt-auto">
+        <footer class="w-full py-12 mt-auto" style="background-color: var(--sp-bg-2); border-top: 1px solid var(--sp-border);">
             <div class="flex flex-col md:flex-row justify-between items-center px-margin-desktop max-w-container-max mx-auto gap-base">
-                <div class="flex items-center gap-2.5 font-headline-md text-headline-md font-extrabold text-on-surface">
+                <div class="flex items-center gap-2.5 font-headline-md text-headline-md font-extrabold" style="color: var(--sp-text);">
                     <span class="w-2 h-2 rounded-full bg-[#32cd32]"></span>
                     Social Pulse
                 </div>
                 <div class="flex gap-gutter my-4 md:my-0">
-                    <a class="font-label-sm text-label-sm text-secondary hover:text-[#32cd32] underline decoration-outline-variant hover:decoration-[#32cd32] transition-all duration-300" href="#">Privacy Policy</a>
-                    <a class="font-label-sm text-label-sm text-secondary hover:text-[#32cd32] underline decoration-outline-variant hover:decoration-[#32cd32] transition-all duration-300" href="#">Terms of Service</a>
-                    <a class="font-label-sm text-label-sm text-secondary hover:text-[#32cd32] underline decoration-outline-variant hover:decoration-[#32cd32] transition-all duration-300" href="#">Help Center</a>
-                    <a class="font-label-sm text-label-sm text-secondary hover:text-[#32cd32] underline decoration-outline-variant hover:decoration-[#32cd32] transition-all duration-300" href="#">Careers</a>
+                    <a class="font-label-sm text-label-sm hover:text-[#32cd32] underline transition-all duration-300" style="color: var(--sp-text-2); text-decoration-color: var(--sp-border);" href="#">Privacy Policy</a>
+                    <a class="font-label-sm text-label-sm hover:text-[#32cd32] underline transition-all duration-300" style="color: var(--sp-text-2); text-decoration-color: var(--sp-border);" href="#">Terms of Service</a>
+                    <a class="font-label-sm text-label-sm hover:text-[#32cd32] underline transition-all duration-300" style="color: var(--sp-text-2); text-decoration-color: var(--sp-border);" href="#">Help Center</a>
+                    <a class="font-label-sm text-label-sm hover:text-[#32cd32] underline transition-all duration-300" style="color: var(--sp-text-2); text-decoration-color: var(--sp-border);" href="#">Careers</a>
                 </div>
-                <p class="font-label-sm text-label-sm text-secondary">
+                <p class="font-label-sm text-label-sm" style="color: var(--sp-text-2);">
                     © 2024 Social Pulse. All rights reserved.
                 </p>
             </div>
@@ -261,10 +326,94 @@ const submit = () => {
 .kinetic-shadow:hover {
     box-shadow: 0px 10px 30px rgba(50, 205, 50, 0.15);
 }
-.focus-ring:focus {
+
+/* ── Guaranteed-readable inputs (fixes the white-on-white issue) ── */
+.sp-login-input {
+    caret-color: #32cd32;
+}
+.sp-login-input::placeholder {
+    color: var(--sp-text-3);
+    opacity: 0.7;
+}
+.sp-login-input:focus {
     outline: none;
-    border-color: #32cd32;
-    box-shadow: 0 0 0 1px #32cd32;
+    border-color: #32cd32 !important;
+    box-shadow: 0 0 0 3px rgba(50, 205, 50, 0.15);
+    background-color: var(--sp-bg-2);
+}
+.sp-login-input:hover {
+    border-color: rgba(76, 227, 70, 0.5) !important;
+}
+/* Neutralize browser/autofill styles that can force white text on white bg */
+.sp-login-input:-webkit-autofill {
+    -webkit-text-fill-color: var(--sp-text);
+    box-shadow: 0 0 0 1000px var(--sp-bg-2) inset;
+    caret-color: #32cd32;
+}
+
+.sp-login-checkbox {
+    background-color: var(--sp-bg-2);
+}
+
+.sp-login-social:hover {
+    background-color: rgba(50, 205, 50, 0.06);
+    border-color: rgba(76, 227, 70, 0.5) !important;
+}
+
+.sp-login-navlink::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 0;
+    height: 1px;
+    background: #32cd32;
+    transition: width 0.3s ease;
+}
+.sp-login-navlink:hover {
+    color: var(--sp-text) !important;
+}
+.sp-login-navlink:hover::after {
+    width: 100%;
+}
+
+.sp-login-gradient-text {
+    background: linear-gradient(135deg, #32cd32 0%, #4ce346 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.sp-login-pulse {
+    animation: sp-login-pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes sp-login-pulse-ring {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.12); }
+}
+
+@keyframes sp-login-status-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.sp-login-status {
+    animation: sp-login-status-in 0.4s ease both;
+}
+
+/* Primary submit button, matching the app's green gradient */
+.sp-login-submit {
+    background: linear-gradient(135deg, #32cd32 0%, #28a828 100%);
+    color: #06120a;
+}
+.sp-login-submit:hover:not(:disabled) {
+    box-shadow: 0 10px 30px rgba(50, 205, 50, 0.3);
+}
+
+/* Login card lift on hover for a bit of life */
+.sp-login-card {
+    transition: box-shadow 0.4s ease, border-color 0.4s ease;
+}
+.sp-login-card:hover {
+    border-color: rgba(50, 205, 50, 0.25);
 }
 
 /* Entrance animation for the login card */
@@ -312,7 +461,9 @@ const submit = () => {
     .animate-rise-in,
     .animate-float-slow,
     .animate-float-slower,
-    .animate-shimmer {
+    .animate-shimmer,
+    .sp-login-pulse,
+    .sp-login-status {
         animation: none !important;
     }
 }
