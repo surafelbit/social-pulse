@@ -8,7 +8,7 @@ Broadcast::channel('App.Models.User.{id}', function (User $user, int $id) {
     return (int) $user->id === (int) $id;
 });
 
-Broadcast::privateChannel('chat.{conversationId}', function (User $user, int $conversationId) {
+Broadcast::private('chat.{conversationId}', function (User $user, int $conversationId) {
     $conversation = Conversation::find($conversationId);
     
     if (!$conversation) {
