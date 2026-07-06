@@ -3,27 +3,26 @@
 namespace App\Services;
 
 use App\Models\Notification;
+use App\Events\NotificationSent;
 use App\Models\Post;
 use App\Models\User;
 
 class NotificationService
 {
-    public static function like(Post $post, User $sender): void
-    {
-        if ($post->user_id === $sender->id) {
-            return;
-        }
+    public static function like($post, $user)
+{
+    if ($post->user_id !== $user->id) {
+        $notification = Notification::create([
+            'user_id' => $post->user_id,
+            'sender_id' => $user->id,
+            'type' => 'like',
+            'reference_id' => $post->id,
+        ]);
 
-        Notification::firstOrCreate(
-            [
-                'user_id' => $post->user_id,
-                'sender_id' => $sender->id,
-                'type' => 'like',
-                'reference_id' => $post->id,
-            ],
-            ['is_read' => false],
-        );
+        // Fire the WebSocket broadcast!
+        event(new NotificationSent($notification));
     }
+}
 
     public static function removeLike(Post $post, User $sender): void
     {
