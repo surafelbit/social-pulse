@@ -29,7 +29,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile/{username}', [PublicProfileController::class, 'show'])->name('profile.show');
     Route::get('/users/search', [PublicProfileController::class, 'search'])->name('users.search');
     Route::patch('/profile/bio', [PublicProfileController::class, 'updateBio'])->name('profile.bio.update');
-    Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->middleware('auth')->name('notifications.index');
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
 });
 
 Route::get('/', function () {

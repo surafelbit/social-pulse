@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Notification;
 use App\Models\Post;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 
 class LikeController extends Controller
@@ -13,25 +13,25 @@ class LikeController extends Controller
         $request->validate(['post_id' => 'required|exists:posts,id']);
         $post = Post::findOrFail($request->post_id);
 
-        // Check if the like already exists
         $alreadyLiked = $request->user()->likes()->where('post_id', $post->id)->exists();
 
-        if (!$alreadyLiked) {
-            // 1. Save the like
+        if (! $alreadyLiked) {
             $request->user()->likes()->create(['post_id' => $post->id]);
-
-            // 2. Fire the notification (if it's not our own post)
-            if ($post->user_id !== auth()->id()) {
-                Notification::create([
-                    'user_id' => $post->user_id,
-                    'sender_id' => auth()->id(),
-                    'type' => 'like',
-                    'reference_id' => $post->id,
-                ]);
-            }
+            NotificationService::like($post, $request->user());
         }
+
         return back();
     }
-    
-    // Your destroy method can stay as it is.
+
+    public function destroy(Post $post)
+    {
+        $request = request();
+        $deleted = $request->user()->likes()->where('post_id', $post->id)->delete();
+
+        if ($deleted) {
+            NotificationService::removeLike($post, $request->user());
+        }
+
+        return back();
+    }
 }
