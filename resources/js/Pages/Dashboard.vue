@@ -3,7 +3,7 @@ import { ref, onMounted, onUnmounted } from "vue";
 import { Link, router, useForm } from "@inertiajs/vue3";
 import UserSearch from "../Components/UserSearch.vue";
 import ToastContainer from "../Components/ToastContainer.vue";
-
+import { usePage } from '@inertiajs/vue3';
 // Header scroll shadow
 const scrolled = ref(false);
 const handleScroll = () => {
@@ -11,6 +11,25 @@ const handleScroll = () => {
 };
 onMounted(() => window.addEventListener("scroll", handleScroll, { passive: true }));
 onUnmounted(() => window.removeEventListener("scroll", handleScroll));
+onMounted(() => {
+    // Only attempt to listen if a user is securely logged in
+    if (page.props.auth?.user) {
+        window.Echo.private(`App.Models.User.${page.props.auth.user.id}`)
+            .listen('.notification.sent', (e) => {
+                // Magically update the global state value
+                page.props.auth.unreadNotifications++;
+                
+                // Optional: Trigger an optional browser alert or audio sound here
+                console.log('Real-time notification arrived!', e.notification);
+            });
+    }
+});
+
+onUnmounted(() => {
+    if (page.props.auth?.user) {
+        window.Echo.leave(`App.Models.User.${page.props.auth.user.id}`);
+    }
+});
 
 if (typeof window !== "undefined") {
     window.showToast = (message, type = "success") => {
