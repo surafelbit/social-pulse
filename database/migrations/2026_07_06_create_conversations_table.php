@@ -12,18 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('conversations', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('recipient_id');
-            $table->timestamp('last_message_at')->nullable();
-            $table->timestamps();
-
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('recipient_id')->references('id')->on('users')->onDelete('cascade');
-            
-            // Ensure unique conversation between two users
-            $table->unique(['user_id', 'recipient_id']);
-        });
+    $table->id();
+    $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+    $table->foreignId('recipient_id')->constrained('users')->cascadeOnDelete();
+    $table->timestamp('last_message_at')->nullable(); // <--- MAKE SURE THIS IS HERE
+    $table->timestamps();
+    $table->unique(['user_id', 'recipient_id']);
+});
     }
 
     /**
