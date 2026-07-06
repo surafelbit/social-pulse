@@ -86,5 +86,33 @@ class User extends Authenticatable
     {
         return $this->hasMany(Notification::class);
     }
+
+    /**
+     * A user has many conversations.
+     */
+    public function conversations()
+    {
+        return $this->hasMany(Conversation::class);
+    }
+
+    /**
+     * A user has sent many messages.
+     */
+    public function sentMessages()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    /**
+     * Get conversations for this user (both initiated and received).
+     */
+    public function getConversations()
+    {
+        return Conversation::where('user_id', $this->id)
+            ->orWhere('recipient_id', $this->id)
+            ->with(['user', 'recipient', 'latestMessage.sender'])
+            ->orderBy('last_message_at', 'desc')
+            ->paginate(15);
+    }
 }
 

@@ -10,6 +10,9 @@ use Illuminate\Foundation\Application;
 use App\Http\Controllers\FollowController;
 use App\Http\Controllers\PublicProfileController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ConversationController;
+use App\Http\Controllers\MessageController;
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [PostController::class, 'index'])->name('dashboard');
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
@@ -30,6 +33,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/users/search', [PublicProfileController::class, 'search'])->name('users.search');
     Route::patch('/profile/bio', [PublicProfileController::class, 'updateBio'])->name('profile.bio.update');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+
+    // Chat routes
+    Route::get('/messages', [ConversationController::class, 'index'])->name('conversations.index');
+    Route::get('/messages/{conversation}', [ConversationController::class, 'show'])->name('conversations.show');
+    Route::post('/messages', [ConversationController::class, 'store'])->name('conversations.store');
+    Route::post('/conversations/{conversation}/messages', [MessageController::class, 'store'])->name('messages.store');
+    Route::get('/conversations/{conversation}/messages', [MessageController::class, 'getMessages'])->name('messages.get');
+    Route::patch('/messages/{message}/read', [MessageController::class, 'markAsRead'])->name('messages.read');
 });
 
 Route::get('/', function () {

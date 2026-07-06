@@ -54,6 +54,13 @@ const follow = (userId) => {
     });
 };
 
+// Message
+const startChat = (userId) => {
+    router.post(route('conversations.store'), { recipient_id: userId }, {
+        preserveScroll: true,
+    });
+};
+
 const goBack = () => window.history.back();
 
 // Lightbox
@@ -143,10 +150,18 @@ const toggleFollowUser = (user) => {
                         <div class="w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold text-white uppercase shadow-lg ring-4" style="background: linear-gradient(135deg, #32cd32 0%, #006e0a 100%); ring-color: var(--sp-bg);">
                             {{ profileUser.name?.charAt(0) ?? '?' }}
                         </div>
-                        <button v-if="profileUser.id !== $page.props.auth.user.id" @click="follow(profileUser.id)" :id="`public-follow-btn-${profileUser.id}`" class="flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold transition-all duration-200" :class="isFollowing ? 'border-2 border-[#32cd32] text-[#32cd32] hover:bg-red-500/10 hover:border-red-400 hover:text-red-400' : 'sp-btn-primary'">
-                            <svg v-if="isFollowing" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
-                            {{ isFollowing ? 'Following' : 'Follow' }}
-                        </button>
+                        <div v-if="profileUser.id !== $page.props.auth.user.id" class="flex gap-2">
+                            <button @click="startChat(profileUser.id)" class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all duration-200 bg-blue-600 text-white hover:bg-blue-700">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Message
+                            </button>
+                            <button @click="follow(profileUser.id)" :id="`public-follow-btn-${profileUser.id}`" class="flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold transition-all duration-200" :class="isFollowing ? 'border-2 border-[#32cd32] text-[#32cd32] hover:bg-red-500/10 hover:border-red-400 hover:text-red-400' : 'sp-btn-primary'">
+                                <svg v-if="isFollowing" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                                {{ isFollowing ? 'Following' : 'Follow' }}
+                            </button>
+                        </div>
                     </div>
                     <h1 class="text-2xl font-bold font-headline tracking-tight mb-0.5" style="color: var(--sp-text);">{{ profileUser.name }}</h1>
                     <p class="text-sm font-medium" style="color: var(--sp-text-3);">@{{ profileUser.username }}</p>
