@@ -187,7 +187,7 @@
                             <div
                                 class="flex-1 overflow-y-auto custom-scrollbar divide-y divide-[var(--sp-border)]"
                             >
-                                <template v-if="conversations.data && conversations.data.length > 0">
+                                <template v-if="conversations && conversations.data && conversations.data.length > 0">
                                     <Link
                                         v-for="conversation in conversations.data"
                                         :key="conversation.id"
@@ -292,7 +292,7 @@
 
                             <!-- Pagination -->
                             <div
-                                v-if="conversations.links"
+                                v-if="conversations && conversations.links"
                                 class="p-5 border-t border-[var(--sp-border)]"
                             >
                                 <div class="flex flex-wrap gap-2">
