@@ -296,21 +296,26 @@
                                 class="p-5 border-t border-[var(--sp-border)]"
                             >
                                 <div class="flex flex-wrap gap-2">
-                                    <Link
-                                        v-for="link in conversations.links"
-                                        :key="link.url"
-                                        :href="link.url"
-                                        :class="[
-                                            'px-4 py-2 text-sm rounded-2xl transition-all',
-                                            link.active
-                                                ? 'bg-[#32cd32] text-black font-medium'
-                                                : link.url
-                                                  ? 'hover:bg-[#32cd32]/10 text-[var(--sp-text-2)]'
-                                                  : 'opacity-40 cursor-not-allowed',
-                                        ]"
-                                    >
-                                        {{ link.label }}
-                                    </Link>
+                                        <div v-for="link in conversations.links" :key="link.label">
+                                            <Link
+                                                v-if="link.url"
+                                                :href="link.url"
+                                                :class="[
+                                                    'px-4 py-2 text-sm rounded-2xl transition-all',
+                                                    link.active
+                                                        ? 'bg-[#32cd32] text-black font-medium'
+                                                        : 'hover:bg-[#32cd32]/10 text-[var(--sp-text-2)]',
+                                                ]"
+                                            >
+                                                {{ link.label }}
+                                            </Link>
+                                            <span
+                                                v-else
+                                                class="px-4 py-2 text-sm rounded-2xl transition-all opacity-40 cursor-not-allowed"
+                                            >
+                                                {{ link.label }}
+                                            </span>
+                                        </div>
                                 </div>
                             </div>
                         </div>
