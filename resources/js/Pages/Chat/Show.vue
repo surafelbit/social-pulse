@@ -396,9 +396,13 @@ const sendMessage = async () => {
 
     sending.value = true;
     try {
-        await axios.post(route("messages.store", props.conversation.id), {
+        const response = await axios.post(route("messages.store", props.conversation.id), {
             body: newMessage.value,
         });
+        const createdMessage = response.data;
+        if (!messages.value.some((m) => m.id === createdMessage.id)) {
+            messages.value.push(createdMessage);
+        }
         newMessage.value = "";
         await scrollToBottom();
     } catch (error) {
@@ -419,16 +423,18 @@ const setupWebSocket = () => {
     echo.value
         .private(`chat.${props.conversation.id}`)
         .listen("message.sent", (data) => {
-            messages.value.push({
-                id: data.id,
-                conversation_id: data.conversation_id,
-                sender_id: data.sender_id,
-                sender: data.sender,
-                body: data.body,
-                created_at: data.created_at,
-                read_at: data.read_at,
-            });
-            scrollToBottom();
+            if (!messages.value.some((m) => m.id === data.id)) {
+                messages.value.push({
+                    id: data.id,
+                    conversation_id: data.conversation_id,
+                    sender_id: data.sender_id,
+                    sender: data.sender,
+                    body: data.body,
+                    created_at: data.created_at,
+                    read_at: data.read_at,
+                });
+                scrollToBottom();
+            }
 
             if (data.sender_id !== props.currentUser.id) {
                 axios.patch(route("messages.read", data.id)).catch(() => {});
