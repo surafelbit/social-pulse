@@ -272,7 +272,7 @@ const toggleFollowUser = (user) => {
                             {{ profileUser.name?.charAt(0) ?? "?" }}
                         </div>
                         <div
-                            v-if="profileUser.id !== $page.props.auth.user.id"
+                            v-if="profileUser && $page.props.auth.user && profileUser.id != $page.props.auth.user.id"
                             class="flex gap-2"
                         >
                             <button
@@ -347,7 +347,7 @@ const toggleFollowUser = (user) => {
                             </p>
                             <button
                                 v-if="
-                                    profileUser.id === $page.props.auth.user.id
+                                    profileUser && $page.props.auth.user && profileUser.id == $page.props.auth.user.id
                                 "
                                 @click="startEditingBio"
                                 class="mt-2 text-xs font-bold uppercase tracking-wider text-[#32cd32] hover:text-[#28a828] transition-colors"
@@ -904,9 +904,8 @@ const toggleFollowUser = (user) => {
                                     </div>
                                 </Link>
 
-                                <!-- Action button: follow/unfollow (exclude logged in user) -->
                                 <button
-                                    v-if="user.id !== $page.props.auth.user.id"
+                                    v-if="user && $page.props.auth.user && user.id != $page.props.auth.user.id"
                                     @click="toggleFollowUser(user)"
                                     class="px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 flex-shrink-0"
                                     :class="
