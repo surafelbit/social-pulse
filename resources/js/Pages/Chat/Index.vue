@@ -187,70 +187,107 @@
                             <div
                                 class="flex-1 overflow-y-auto custom-scrollbar divide-y divide-[var(--sp-border)]"
                             >
-                                <Link
-                                    v-for="conversation in conversations.data"
-                                    :key="conversation.id"
-                                    :href="
-                                        route(
-                                            'conversations.show',
-                                            conversation.id,
-                                        )
-                                    "
-                                    class="p-5 flex items-center gap-4 hover:bg-[var(--sp-bg-2)] transition-all group"
-                                >
-                                    <div class="relative">
-                                        <img
-                                            :src="
-                                                getOtherUser(conversation)
-                                                    ?.avatar ||
-                                                'https://via.placeholder.com/48'
-                                            "
-                                            :alt="
-                                                getOtherUser(conversation)?.name
-                                            "
-                                            class="w-14 h-14 rounded-2xl object-cover"
-                                        />
-                                        <div
-                                            class="absolute bottom-0 right-0 w-4 h-4 bg-[#32cd32] rounded-full ring-2 ring-[var(--sp-card)]"
-                                        ></div>
-                                    </div>
-
-                                    <div class="flex-1 min-w-0">
-                                        <div
-                                            class="flex justify-between items-baseline"
-                                        >
-                                            <p
-                                                class="font-semibold truncate"
-                                                style="color: var(--sp-text)"
-                                            >
-                                                {{
+                                <template v-if="conversations.data && conversations.data.length > 0">
+                                    <Link
+                                        v-for="conversation in conversations.data"
+                                        :key="conversation.id"
+                                        :href="
+                                            route(
+                                                'conversations.show',
+                                                conversation.id,
+                                            )
+                                        "
+                                        class="p-5 flex items-center gap-4 hover:bg-[var(--sp-bg-2)] transition-all group"
+                                    >
+                                        <div class="relative">
+                                            <img
+                                                :src="
                                                     getOtherUser(conversation)
-                                                        ?.name
-                                                }}
-                                            </p>
+                                                        ?.avatar ||
+                                                    'https://via.placeholder.com/48'
+                                                "
+                                                :alt="
+                                                    getOtherUser(conversation)?.name
+                                                "
+                                                class="w-14 h-14 rounded-2xl object-cover"
+                                            />
+                                            <div
+                                                class="absolute bottom-0 right-0 w-4 h-4 bg-[#32cd32] rounded-full ring-2 ring-[var(--sp-card)]"
+                                            ></div>
+                                        </div>
+
+                                        <div class="flex-1 min-w-0">
+                                            <div
+                                                class="flex justify-between items-baseline"
+                                            >
+                                                <p
+                                                    class="font-semibold truncate"
+                                                    style="color: var(--sp-text)"
+                                                >
+                                                    {{
+                                                        getOtherUser(conversation)
+                                                            ?.name
+                                                    }}
+                                                </p>
+                                                <p
+                                                    class="text-xs whitespace-nowrap"
+                                                    style="color: var(--sp-text-3)"
+                                                >
+                                                    {{
+                                                        formatTime(
+                                                            conversation.last_message_at ||
+                                                                conversation.created_at,
+                                                        )
+                                                    }}
+                                                </p>
+                                            </div>
                                             <p
-                                                class="text-xs whitespace-nowrap"
-                                                style="color: var(--sp-text-3)"
+                                                class="text-sm truncate mt-1"
+                                                style="color: var(--sp-text-2)"
                                             >
                                                 {{
-                                                    formatTime(
-                                                        conversation.last_message_at ||
-                                                            conversation.created_at,
-                                                    )
+                                                    conversation.latest_message
+                                                        ?.body || "Start chatting"
                                                 }}
                                             </p>
                                         </div>
-                                        <p
-                                            class="text-sm truncate mt-1"
-                                            style="color: var(--sp-text-2)"
-                                        >
-                                            {{
-                                                conversation.latest_message
-                                                    ?.body || "Start chatting"
-                                            }}
-                                        </p>
+                                    </Link>
+                                </template>
+                                <template v-else>
+                                    <div class="p-6 text-center text-sm text-[var(--sp-text-3)] border-b border-[var(--sp-border)]">
+                                        No recent chats. Start a conversation below!
                                     </div>
-                                </Link>
+                                    <div class="p-4">
+                                        <p class="text-xs font-semibold uppercase tracking-wider text-[var(--sp-text-3)] mb-3 px-2">
+                                            All Users
+                                        </p>
+                                        <div class="space-y-1">
+                                            <div
+                                                v-for="user in users"
+                                                :key="user.id"
+                                                @click="startConversation(user.id)"
+                                                class="flex items-center gap-4 p-3 hover:bg-[#32cd32]/10 rounded-2xl cursor-pointer transition-all group"
+                                            >
+                                                <img
+                                                    :src="
+                                                        user.avatar ||
+                                                        'https://via.placeholder.com/48'
+                                                    "
+                                                    :alt="user.name"
+                                                    class="w-10 h-10 rounded-2xl object-cover ring-2 ring-offset-2 ring-offset-[var(--sp-card)] ring-[#32cd32]/20"
+                                                />
+                                                <div class="flex-1 min-w-0">
+                                                    <p class="font-semibold text-sm truncate" style="color: var(--sp-text)">
+                                                        {{ user.name }}
+                                                    </p>
+                                                    <p class="text-xs truncate" style="color: var(--sp-text-2)">
+                                                        @{{ user.username }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
                             </div>
 
                             <!-- Pagination -->
@@ -315,7 +352,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { Link, router } from "@inertiajs/vue3";
+import { Link, router, usePage } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 
 const props = defineProps({
@@ -351,8 +388,10 @@ const filteredUsers = computed(() => {
     );
 });
 
+const page = usePage();
+
 const getOtherUser = (conversation) => {
-    const currentUserId = props.conversations?.user_id; // adjust based on your actual data structure
+    const currentUserId = page.props.auth.user?.id;
     return conversation.user_id === currentUserId
         ? conversation.recipient
         : conversation.user;
