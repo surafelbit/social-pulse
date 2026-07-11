@@ -4,9 +4,17 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Services\CloudinaryService;
 
 class PostController extends Controller
 {
+    protected CloudinaryService $cloudinaryService;
+
+    public function __construct(CloudinaryService $cloudinaryService)
+    {
+        $this->cloudinaryService = $cloudinaryService;
+    }
+
     public function index()
     {
         $user = auth()->user();
@@ -45,9 +53,13 @@ class PostController extends Controller
         ];
 
         if ($request->hasFile('image')) {
-            // Store on the configured default disk (S3 in production, 'public' locally)
-            $path = $request->file('image')->store('posts', config('filesystems.default'));
-            $postData['image_path'] = $path;
+            // Upload to Cloudinary and get the secure URL
+            $imageUrl = $this->cloudinaryService->uploadImage($request->file('image'), 'posts');
+            if ($imageUrl) {
+                $postData['image_path'] = $imageUrl;
+            } else {
+                return back()->withErrors(['image' => 'Failed to upload image. Please try again.']);
+            }
         }
 
         $request->user()->posts()->create($postData);
@@ -72,10 +84,8 @@ class PostController extends Controller
     {
         abort_if($post->user_id !== auth()->id(), 403);
 
-        // Delete stored image if present
-        if ($post->image_path) {
-            \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->delete($post->image_path);
-        }
+        // Images are stored on Cloudinary, so no need to delete them here
+        // Cloudinary automatically handles cleanup with transformations
 
         $post->delete();
 

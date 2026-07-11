@@ -39,7 +39,7 @@ class ConversationController extends Controller
 
         $messages = $conversation->messages()
             ->with('sender')
-            ->orderBy('created_at', 'asc')
+            ->orderBy('created_at', 'desc')
             ->paginate(30);
 
         // Mark messages as read

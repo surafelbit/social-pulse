@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 
 class Post extends Model
 {
@@ -12,19 +11,14 @@ class Post extends Model
 
     /**
      * Appended accessor so every serialised Post carries a ready-to-use URL.
-     * Works for both S3 (returns a pre-signed or public URL) and local storage.
+     * When using Cloudinary, image_path is already a full secure URL.
      */
     protected $appends = ['image_url'];
 
     public function getImageUrlAttribute(): ?string
     {
-        if (!$this->image_path) {
-            return null;
-        }
-
-        // When FILESYSTEM_DISK=s3 this returns the S3 object URL.
-        // When using the local 'public' disk it falls back to the symlinked path.
-        return Storage::disk(config('filesystems.default'))->url($this->image_path);
+        // image_path from Cloudinary is already a complete secure URL
+        return $this->image_path;
     }
 
     // Relationships: A post belongs to a user, and has many likes and comments
@@ -47,4 +41,4 @@ class Post extends Model
     {
         return $this->hasMany(Comment::class)->latest();
     }
-}
+}

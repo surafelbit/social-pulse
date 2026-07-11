@@ -207,6 +207,20 @@
                         ref="messagesContainer"
                         class="flex-1 overflow-y-auto p-6 space-y-6 bg-[var(--sp-bg)] custom-scrollbar"
                     >
+                        <div v-if="currentPage < lastPage" class="flex justify-center py-2">
+                            <button
+                                @click="loadOlderMessages"
+                                class="text-xs px-4 py-2 rounded-full border border-[var(--sp-border)] hover:bg-[#32cd32]/10 transition-colors"
+                                style="color: var(--sp-text-2);"
+                                :disabled="loadingOlder"
+                            >
+                                <span v-if="loadingOlder" class="flex items-center gap-2">
+                                    <span class="animate-spin h-3.5 w-3.5 border-2 border-[#32cd32] border-t-transparent rounded-full"></span>
+                                    Loading history...
+                                </span>
+                                <span v-else>Load older messages</span>
+                            </button>
+                        </div>
                         <div
                             v-for="message in sortedMessages"
                             :key="message.id"
@@ -327,7 +341,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, nextTick } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from "vue";
 import { Link } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import axios from "axios";
@@ -363,6 +377,10 @@ const sending = ref(false);
 const messagesContainer = ref(null);
 const messages = ref(props.messages?.data || []);
 const echo = ref(null);
+
+const currentPage = ref(props.messages?.current_page || 1);
+const lastPage = ref(props.messages?.last_page || 1);
+const loadingOlder = ref(false);
 
 const otherUser = computed(() => {
     return props.conversation.user_id === props.currentUser.id
@@ -412,6 +430,50 @@ const sendMessage = async () => {
     }
 };
 
+const loadOlderMessages = async () => {
+    if (currentPage.value >= lastPage.value || loadingOlder.value) return;
+
+    loadingOlder.value = true;
+    try {
+        const container = messagesContainer.value;
+        const oldScrollHeight = container ? container.scrollHeight : 0;
+        const oldScrollTop = container ? container.scrollTop : 0;
+
+        const response = await axios.get(route("messages.get", props.conversation.id), {
+            params: { page: currentPage.value + 1 }
+        });
+
+        const newMessages = response.data.data;
+        
+        newMessages.forEach(msg => {
+            if (!messages.value.some(m => m.id === msg.id)) {
+                messages.value.push(msg);
+            }
+        });
+
+        currentPage.value = response.data.current_page;
+        lastPage.value = response.data.last_page;
+
+        await nextTick();
+        if (container) {
+            container.scrollTop = container.scrollHeight - oldScrollHeight + oldScrollTop;
+        }
+    } catch (error) {
+        console.error("Error loading older messages:", error);
+    } finally {
+        loadingOlder.value = false;
+    }
+};
+
+const handleScroll = () => {
+    const container = messagesContainer.value;
+    if (!container) return;
+    
+    if (container.scrollTop <= 10 && currentPage.value < lastPage.value && !loadingOlder.value) {
+        loadOlderMessages();
+    }
+};
+
 const setupWebSocket = () => {
     if (typeof window.Echo === "undefined") {
         console.warn("Laravel Echo not initialized");
@@ -422,7 +484,7 @@ const setupWebSocket = () => {
 
     echo.value
         .private(`chat.${props.conversation.id}`)
-        .listen("message.sent", (data) => {
+        .listen(".message.sent", (data) => {
             if (!messages.value.some((m) => m.id === data.id)) {
                 messages.value.push({
                     id: data.id,
@@ -446,6 +508,10 @@ onMounted(() => {
     setupWebSocket();
     scrollToBottom();
 
+    if (messagesContainer.value) {
+        messagesContainer.value.addEventListener("scroll", handleScroll);
+    }
+
     // Initialize theme
     const saved = localStorage.getItem("sp-theme");
     if (saved === "dark") {
@@ -460,11 +526,19 @@ onMounted(() => {
     }
 });
 
+onUnmounted(() => {
+    if (messagesContainer.value) {
+        messagesContainer.value.removeEventListener("scroll", handleScroll);
+    }
+});
+
 watch(
     () => props.messages,
     (newMessages) => {
         if (newMessages?.data) {
             messages.value = newMessages.data;
+            currentPage.value = newMessages.current_page || 1;
+            lastPage.value = newMessages.last_page || 1;
             scrollToBottom();
         }
     },
