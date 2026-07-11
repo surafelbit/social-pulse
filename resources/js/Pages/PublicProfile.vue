@@ -609,13 +609,13 @@ const toggleFollowUser = (user) => {
                         </p>
                         <!-- Post image -->
                         <div
-                            v-if="post.image_path"
+                            v-if="post.image_url"
                             class="mt-3 rounded-2xl overflow-hidden cursor-pointer relative"
                             style="max-height: 24rem"
-                            @click="openLightbox(`/storage/${post.image_path}`)"
+                            @click="openLightbox(post.image_url)"
                         >
                             <img
-                                :src="`/storage/${post.image_path}`"
+                                :src="post.image_url"
                                 alt="Post image"
                                 class="w-full object-cover transition-transform duration-300 hover:scale-[1.02]"
                             />
@@ -706,10 +706,10 @@ const toggleFollowUser = (user) => {
                         v-for="post in mediaPosts"
                         :key="post.id"
                         class="media-grid-item"
-                        @click="openLightbox(`/storage/${post.image_path}`)"
+                        @click="openLightbox(post.image_url)"
                     >
                         <img
-                            :src="`/storage/${post.image_path}`"
+                            :src="post.image_url"
                             :alt="post.content || 'Post image'"
                             class="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                         />

@@ -611,11 +611,11 @@ const deletePost = (postId) => {
                             {{ post.content }}
                         </p>
                         <div
-                            v-if="post.image_path"
+                            v-if="post.image_url"
                             class="w-full rounded-xl overflow-hidden mb-4 sp-post-image-wrap"
                         >
                             <img
-                                :src="`/storage/${post.image_path}`"
+                                :src="post.image_url"
                                 alt="Post image"
                                 class="w-full object-cover sp-post-image"
                             />

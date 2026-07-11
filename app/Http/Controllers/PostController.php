@@ -45,7 +45,8 @@ class PostController extends Controller
         ];
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('posts', 'public');
+            // Store on the configured default disk (S3 in production, 'public' locally)
+            $path = $request->file('image')->store('posts', config('filesystems.default'));
             $postData['image_path'] = $path;
         }
 
@@ -73,7 +74,7 @@ class PostController extends Controller
 
         // Delete stored image if present
         if ($post->image_path) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($post->image_path);
+            \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->delete($post->image_path);
         }
 
         $post->delete();
