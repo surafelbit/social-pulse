@@ -53,13 +53,16 @@ class PostController extends Controller
         ];
 
         if ($request->hasFile('image')) {
-            // Upload to Cloudinary and get the secure URL
-            $imageUrl = $this->cloudinaryService->uploadImage($request->file('image'), 'posts');
-            if ($imageUrl) {
-                $postData['image_path'] = $imageUrl;
-            } else {
-                return back()->withErrors(['image' => 'Failed to upload image. Please try again.']);
+            if ($this->cloudinaryService->isConfigured()) {
+                // Upload to Cloudinary and get the secure URL
+                $imageUrl = $this->cloudinaryService->uploadImage($request->file('image'), 'posts');
+                if ($imageUrl) {
+                    $postData['image_path'] = $imageUrl;
+                } else {
+                    return back()->withErrors(['image' => 'Failed to upload image. Please try again.']);
+                }
             }
+            // If Cloudinary is not configured, silently skip the image and post text-only.
         }
 
         $request->user()->posts()->create($postData);
