@@ -1,119 +1,154 @@
 <template>
-    <AuthenticatedLayout>
-        <div
-            class="font-body-md min-h-screen flex flex-col transition-colors duration-300"
-            style="background-color: var(--sp-bg); color: var(--sp-text)"
-        >
-            <!-- Top Navigation (matching login style) -->
-            <nav
-                class="w-full top-0 sticky z-50 sp-chat-nav"
-                style="
-                    border-bottom: 1px solid var(--sp-border);
-                    background-color: color-mix(
-                        in srgb,
-                        var(--sp-bg) 85%,
-                        transparent
-                    );
-                    backdrop-filter: blur(16px);
-                "
+    <div
+        class="font-body-md min-h-screen flex flex-col transition-colors duration-300"
+        style="background-color: var(--sp-bg); color: var(--sp-text)"
+    >
+        <header class="sticky top-0 z-50 sp-header">
+            <div
+                class="max-w-6xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between gap-4"
             >
-                <div
-                    class="flex justify-between items-center h-16 px-margin-desktop max-w-container-max mx-auto"
-                >
-                    <div class="flex items-center gap-3">
-                        <Link href="/" class="flex items-center gap-2.5 group">
-                            <span
-                                class="w-2.5 h-2.5 rounded-full bg-[#32cd32] shadow-[0_0_16px_rgba(50,205,50,0.7)]"
-                            ></span>
-                            <span
-                                class="font-headline-md text-headline-md font-bold tracking-tight"
-                                style="color: var(--sp-text)"
-                            >
-                                Social<span class="sp-login-gradient-text"
-                                    >Pulse</span
-                                >
-                            </span>
-                        </Link>
-
-                        <div
-                            class="hidden sm:flex items-center text-sm text-[var(--sp-text-2)]"
-                        >
-                            <span class="mx-3">•</span>
-                            Messages
-                        </div>
-                    </div>
-
-                    <div class="flex items-center gap-4">
-                        <!-- Theme Toggle -->
-                        <button
-                            @click="toggleTheme"
-                            class="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 hover:bg-[#32cd32]/10 hover:text-[#32cd32]"
-                            style="
-                                color: var(--sp-text-2);
-                                border: 1px solid var(--sp-border);
-                            "
-                            :title="
-                                isDark
-                                    ? 'Switch to light mode'
-                                    : 'Switch to dark mode'
-                            "
-                        >
-                            <svg
-                                v-if="isDark"
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="w-4 h-4"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                stroke-width="2"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
-                                />
-                            </svg>
-                            <svg
-                                v-else
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="w-4 h-4"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                stroke-width="2"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"
-                                />
-                            </svg>
-                        </button>
-
-                        <Link
-                            :href="route('conversations.index')"
-                            class="flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-[#32cd32]/10 transition-colors text-sm font-medium"
-                            style="color: var(--sp-text-2)"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="w-5 h-5"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                stroke-width="2"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M6 18L18 6M6 6l12 12"
-                                />
-                            </svg>
-                            All Chats
-                        </Link>
-                    </div>
+                <!-- Logo -->
+                <div class="flex items-center gap-2.5">
+                    <span
+                        class="w-2.5 h-2.5 rounded-full bg-[#32cd32] shadow-[0_0_12px_rgba(50,205,50,0.7)]"
+                    ></span>
+                    <Link
+                        :href="route('dashboard')"
+                        class="font-headline font-bold text-lg tracking-tight"
+                        style="color: var(--sp-text)"
+                    >
+                        Social<span class="sp-gradient-text">Pulse</span>
+                    </Link>
                 </div>
-            </nav>
+
+                <!-- User Search Bar -->
+                <UserSearch />
+
+                <!-- Right side nav -->
+                <nav class="flex items-center gap-3 md:gap-5">
+                    <!-- Profile link -->
+                    <Link
+                        :href="
+                            route(
+                                'profile.show',
+                                $page.props.auth.user.username,
+                            )
+                        "
+                        class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide transition-colors duration-200 hover:text-[#32cd32]"
+                        style="color: var(--sp-text-2)"
+                    >
+                        <div class="w-7 h-7 sp-avatar text-[10px]">
+                            {{ $page.props.auth.user.name?.charAt(0) ?? "?" }}
+                        </div>
+                        <span class="hidden sm:inline">{{
+                            $page.props.auth.user.name
+                        }}</span>
+                    </Link>
+
+                    <!-- Theme toggle -->
+                    <button
+                        @click="toggleTheme"
+                        class="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 hover:bg-[#32cd32]/10 hover:text-[#32cd32] focus:outline-none"
+                        style="
+                            color: var(--sp-text-2);
+                            border: 1px solid var(--sp-border);
+                        "
+                        :title="
+                            isDark
+                                ? 'Switch to light mode'
+                                : 'Switch to dark mode'
+                        "
+                    >
+                        <svg
+                            v-if="isDark"
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
+                            />
+                        </svg>
+                        <svg
+                            v-else
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"
+                            />
+                        </svg>
+                    </button>
+
+                    <!-- Feed Link -->
+                    <Link
+                        :href="route('dashboard')"
+                        class="text-xs font-semibold uppercase tracking-wide transition-colors hover:text-[#32cd32]"
+                        style="color: var(--sp-text-2)"
+                    >
+                        Feed
+                    </Link>
+
+                    <!-- Messages (active) -->
+                    <Link
+                        :href="route('conversations.index')"
+                        class="relative flex items-center justify-center w-9 h-9 rounded-full transition-colors bg-[#32cd32]/10 text-[#32cd32]"
+                        aria-label="Messages"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                    </Link>
+
+                    <!-- Notifications -->
+                    <Link :href="route('notifications.index')" class="relative flex items-center justify-center w-9 h-9 rounded-full transition-colors hover:bg-[#32cd32]/10 text-[var(--sp-text-2)]" aria-label="Notifications">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        <span
+                            v-if="$page.props.auth.unreadNotifications > 0"
+                            class="absolute -top-0.5 -right-0.5 min-w-[1.125rem] h-[1.125rem] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none"
+                        >
+                            {{ $page.props.auth.unreadNotifications > 9 ? '9+' : $page.props.auth.unreadNotifications }}
+                        </span>
+                    </Link>
+
+                    <!-- Logout -->
+                    <button
+                        @click="logout"
+                        class="hidden sm:flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide transition-colors duration-200 hover:text-red-400"
+                        style="color: var(--sp-text-2)"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-3.5 h-3.5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
+                            />
+                        </svg>
+                        Logout
+                    </button>
+                </nav>
+            </div>
+        </header>
 
             <div
                 class="flex-1 flex max-w-container-max mx-auto w-full px-margin-mobile md:px-margin-desktop py-6 gap-6"
@@ -324,28 +359,19 @@
                         </form>
                     </div>
                 </div>
-            </div>
-
-            <!-- Footer (minimal) -->
-            <footer
-                class="py-6 text-center text-xs"
-                style="
-                    color: var(--sp-text-3);
-                    border-top: 1px solid var(--sp-border);
-                "
-            >
-                © 2026 Social Pulse • Secure Chat
-            </footer>
         </div>
-    </AuthenticatedLayout>
+    </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from "vue";
-import { Link } from "@inertiajs/vue3";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import { Link, router, usePage } from "@inertiajs/vue3";
+import UserSearch from "@/Components/UserSearch.vue";
 import axios from "axios";
 import Echo from "laravel-echo";
+
+const page = usePage();
+const logout = () => router.post(route("logout"));
 
 // Theme handling (same as login)
 const isDark = ref(
